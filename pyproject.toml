@@ -33,6 +33,8 @@ dependencies = [
 
 [project.scripts]
 cuttle = "cuttle.cli:app"
+cuttlectl = "cuttle.worker.cuttlectl:main"
+cuttle-worker = "cuttle.worker.main:main"
 
 [build-system]
 requires = ["hatchling"]
