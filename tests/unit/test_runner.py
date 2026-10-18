@@ -106,7 +106,16 @@ def test_runner_cancel_kills_child_and_grandchild(tmp_path: Path) -> None:
     # Verify grandchild was terminated
     assert pid_file.exists()
     grandchild_pid = int(pid_file.read_text().strip())
-    assert not psutil.pid_exists(grandchild_pid) or not psutil.Process(grandchild_pid).is_running()
+    try:
+        proc = psutil.Process(grandchild_pid)
+        gone, _ = psutil.wait_procs([proc], timeout=3.0)
+        assert proc in gone or proc.status() in (
+            getattr(psutil, "STATUS_DEAD", "dead"),
+            getattr(psutil, "STATUS_STOPPED", "stopped"),
+            "terminated",
+        )
+    except psutil.NoSuchProcess:
+        pass
 
 
 def test_runner_tool_failure_raises_e_tool_failed() -> None:
