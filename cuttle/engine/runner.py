@@ -22,6 +22,7 @@ import psutil
 
 from cuttle.engine.errors import CuttleError
 from cuttle.engine.types import CancelToken
+from cuttle.platform import create_process_guard
 
 
 def kill_process_tree(pid: int) -> None:
@@ -93,87 +94,97 @@ def run_command(
     # Windows creation flag: suppress creation of separate console window
     creationflags = getattr(subprocess, "CREATE_NO_WINDOW", 0)
 
-    proc = subprocess.Popen(
-        argv,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True,
-        bufsize=1,
-        cwd=cwd,
-        env=env,
-        shell=False,
-        creationflags=creationflags,
-    )
-
-    reader_thread: threading.Thread | None = None
-    if proc.stdout is not None:
-        reader_thread = threading.Thread(
-            target=_read_stdout_stream,
-            args=(proc.stdout, on_stdout_line),
-            daemon=True,
-        )
-        reader_thread.start()
-
-    start_time = time.monotonic()
+    guard = create_process_guard()
 
     try:
-        while proc.poll() is None:
-            # 1. Check cancellation
-            if cancel is not None and cancel.cancelled:
-                kill_process_tree(proc.pid)
-                with contextlib.suppress(subprocess.TimeoutExpired):
-                    proc.wait(timeout=2)
-                raise CuttleError(
-                    code="E_CANCELLED",
-                    user_message="The conversion was cancelled.",
-                    detail=f"Cancelled by user token, killed pid {proc.pid}",
-                )
+        proc = subprocess.Popen(
+            argv,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            bufsize=1,
+            cwd=cwd,
+            env=env,
+            shell=False,
+            creationflags=creationflags,
+        )
 
-            # 2. Check timeout
-            elapsed = time.monotonic() - start_time
-            if timeout_s is not None and elapsed > timeout_s:
-                kill_process_tree(proc.pid)
-                with contextlib.suppress(subprocess.TimeoutExpired):
-                    proc.wait(timeout=2)
-                raise CuttleError(
-                    code="E_TIMEOUT",
-                    user_message="The conversion took too long and was stopped.",
-                    detail=f"Exceeded timeout of {timeout_s}s, killed pid {proc.pid}",
-                )
+        guard.assign_process(proc.pid)
 
-            time.sleep(0.02)
-
-        # Process exited on its own
-        retcode = proc.wait()
-        if reader_thread is not None:
-            reader_thread.join(timeout=1.0)
-
-        stderr_text = ""
-        if proc.stderr is not None:
-            stderr_text = proc.stderr.read()
-
-        if retcode != 0:
-            if cancel is not None and cancel.cancelled:
-                detail_msg = (
-                    f"Process exited {retcode} following cancellation: {stderr_text.strip()}"
-                )
-                raise CuttleError(
-                    code="E_CANCELLED",
-                    user_message="The conversion was cancelled.",
-                    detail=detail_msg,
-                )
-            raise CuttleError(
-                code="E_TOOL_FAILED",
-                user_message="The conversion tool failed.",
-                detail=stderr_text.strip() or f"Process exited with status {retcode}",
+        reader_thread: threading.Thread | None = None
+        if proc.stdout is not None:
+            reader_thread = threading.Thread(
+                target=_read_stdout_stream,
+                args=(proc.stdout, on_stdout_line),
+                daemon=True,
             )
+            reader_thread.start()
 
-        return retcode
+        start_time = time.monotonic()
 
-    except (CuttleError, Exception):
-        kill_process_tree(proc.pid)
-        with contextlib.suppress(subprocess.TimeoutExpired):
-            proc.wait(timeout=2)
-        if reader_thread is not None:
-            reader_thread.join(timeout=0.5)
-        raise
+        try:
+            while proc.poll() is None:
+                # 1. Check cancellation
+                if cancel is not None and cancel.cancelled:
+                    guard.terminate()
+                    kill_process_tree(proc.pid)
+                    with contextlib.suppress(subprocess.TimeoutExpired):
+                        proc.wait(timeout=2)
+                    raise CuttleError(
+                        code="E_CANCELLED",
+                        user_message="The conversion was cancelled.",
+                        detail=f"Cancelled by user token, killed pid {proc.pid}",
+                    )
+
+                # 2. Check timeout
+                elapsed = time.monotonic() - start_time
+                if timeout_s is not None and elapsed > timeout_s:
+                    guard.terminate()
+                    kill_process_tree(proc.pid)
+                    with contextlib.suppress(subprocess.TimeoutExpired):
+                        proc.wait(timeout=2)
+                    raise CuttleError(
+                        code="E_TIMEOUT",
+                        user_message="The conversion took too long and was stopped.",
+                        detail=f"Exceeded timeout of {timeout_s}s, killed pid {proc.pid}",
+                    )
+
+                time.sleep(0.02)
+
+            # Process exited on its own
+            retcode = proc.wait()
+            if reader_thread is not None:
+                reader_thread.join(timeout=1.0)
+
+            stderr_text = ""
+            if proc.stderr is not None:
+                stderr_text = proc.stderr.read()
+
+            if retcode != 0:
+                if cancel is not None and cancel.cancelled:
+                    detail_msg = (
+                        f"Process exited {retcode} following cancellation: {stderr_text.strip()}"
+                    )
+                    raise CuttleError(
+                        code="E_CANCELLED",
+                        user_message="The conversion was cancelled.",
+                        detail=detail_msg,
+                    )
+                raise CuttleError(
+                    code="E_TOOL_FAILED",
+                    user_message="The conversion tool failed.",
+                    detail=stderr_text.strip() or f"Process exited with status {retcode}",
+                )
+
+            return retcode
+
+        except (CuttleError, Exception):
+            guard.terminate()
+            kill_process_tree(proc.pid)
+            with contextlib.suppress(subprocess.TimeoutExpired):
+                proc.wait(timeout=2)
+            if reader_thread is not None:
+                reader_thread.join(timeout=0.5)
+            raise
+    finally:
+        guard.close()

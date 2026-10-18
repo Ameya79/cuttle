@@ -26,6 +26,9 @@ dependencies = [
     "Pillow>=10.0",
     "pillow-heif>=0.13",
     "psutil>=5.9",
+    "pywin32>=306; sys_platform == 'win32'",
+    "windows-toasts>=1.1.0; sys_platform == 'win32'",
+    "PySide6>=6.6",
 ]
 
 [project.scripts]
@@ -42,6 +45,9 @@ line-length = 100
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "N", "UP", "B", "A", "SIM", "RUF"]
 
+[tool.ruff.lint.per-file-ignores]
+"cuttle/cli.py" = ["B008"]
+
 [tool.mypy]
 python_version = "3.12"
 strict = true
@@ -49,11 +55,29 @@ warn_return_any = true
 warn_unused_configs = true
 
 [[tool.mypy.overrides]]
-module = ["filetype", "filetype.*", "pillow_heif", "pillow_heif.*", "psutil", "psutil.*"]
+module = [
+    "filetype",
+    "filetype.*",
+    "pillow_heif",
+    "pillow_heif.*",
+    "psutil",
+    "psutil.*",
+    "win32job",
+    "win32api",
+    "win32con",
+    "win32pipe",
+    "win32file",
+    "winerror",
+    "windows_toasts",
+    "windows_toasts.*",
+    "PySide6",
+    "PySide6.*",
+]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["."]
 addopts = "-v --tb=short"
 
 [dependency-groups]
@@ -63,4 +87,5 @@ dev = [
     "ruff>=0.4",
     "mypy>=1.8",
     "hypothesis>=6.0",
+    "pyinstaller>=6.0",
 ]

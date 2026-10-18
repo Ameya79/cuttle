@@ -16,18 +16,18 @@ Exit codes:
 from __future__ import annotations
 
 import json
-from pathlib import Path
 import shutil
 import subprocess
-import sys
+from pathlib import Path
 
 import filetype
-from PIL import Image
 import pillow_heif
 import psutil
 import typer
+from PIL import Image
 
-from cuttle.engine.convert import convert as engine_convert, list_targets
+from cuttle.engine.convert import convert as engine_convert
+from cuttle.engine.convert import list_targets
 from cuttle.engine.errors import CuttleError
 from cuttle.engine.registry import load_registry
 

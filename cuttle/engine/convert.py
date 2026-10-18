@@ -14,8 +14,8 @@ Implements TRD §6.5 steps 1 through 9:
 
 from __future__ import annotations
 
-from pathlib import Path
 import shutil
+from pathlib import Path
 
 from cuttle.adapters.base import BaseAdapter
 from cuttle.adapters.ffmpeg import FFmpegAdapter
@@ -126,6 +126,10 @@ def _run_single_edge(
         )
 
 
+def _noop_progress(pct: float | None, msg: str = "") -> None:
+    pass
+
+
 def convert(
     src: Path,
     dst_fmt: str,
@@ -138,7 +142,7 @@ def convert(
     """Convert source file to dst_fmt following TRD §6.5 pipeline."""
     target_fmt = dst_fmt.lower().lstrip(".")
     cancel_token = cancel or CancelToken()
-    prog_cb = on_progress or (lambda p, m="": None)
+    prog_cb: ProgressCb = on_progress if on_progress is not None else _noop_progress
 
     # 1. Source verification & lock check
     check_source_readable(src)

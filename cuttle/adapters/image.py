@@ -13,8 +13,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from PIL import Image, ImageOps
 import pillow_heif
+from PIL import Image, ImageOps
 
 from cuttle.adapters.base import BaseAdapter
 from cuttle.engine.errors import CuttleError

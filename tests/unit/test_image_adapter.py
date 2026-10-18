@@ -15,8 +15,8 @@ from __future__ import annotations
 import hashlib
 from pathlib import Path
 
-from PIL import Image
 import pytest
+from PIL import Image
 
 from cuttle.adapters.image import ImageAdapter
 from cuttle.engine.errors import CuttleError
@@ -123,7 +123,7 @@ class TestImageConversions:
         tmp_path: Path,
     ) -> None:
         """Transparent pixels must flatten onto solid white (255, 255, 255) for JPG and BMP."""
-        # Create a transparent PNG: red pixel with alpha=0 at (0, 0), blue pixel with alpha=255 at (8, 8)
+        # Create a transparent PNG: red at (0, 0) with alpha=0, blue at (8, 8) with alpha=255
         src_png = tmp_path / "transparent_sample.png"
         img = Image.new("RGBA", (10, 10), (0, 0, 0, 0))
         img.putpixel((8, 8), (0, 0, 255, 255))
@@ -145,7 +145,9 @@ class TestImageConversions:
             with Image.open(final_out) as decoded:
                 pixel_0_0 = decoded.getpixel((0, 0))
                 # Must be white
-                assert pixel_0_0[:3] == (255, 255, 255), f"Pixel (0,0) was {pixel_0_0}, expected white"
+                assert pixel_0_0[:3] == (255, 255, 255), (
+                    f"Pixel (0,0) was {pixel_0_0}, expected white"
+                )
 
         assert sha256_of(src_png) == initial_hash
 
@@ -155,7 +157,7 @@ class TestImageConversions:
         tmp_path: Path,
     ) -> None:
         """EXIF orientation tag must be transposed into actual pixel data."""
-        # Create an asymmetric image (width=20, height=10) with EXIF Orientation 6 (rotates 90 CW to 10x20)
+        # Create an asymmetric image (20x10) with EXIF Orientation 6 (rotates 90 CW to 10x20)
         src_jpg = tmp_path / "oriented.jpg"
         im = Image.new("RGB", (20, 10), (100, 150, 200))
         exif = im.getexif()

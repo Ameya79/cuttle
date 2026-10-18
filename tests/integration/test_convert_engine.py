@@ -227,7 +227,9 @@ class TestConvertExtremeEdgeCases:
         fixtures_dir: Path,
         tmp_path: Path,
     ) -> None:
-        """Converting the same file twice to the same dir creates (converted), then (converted) (2)."""
+        """Converting the same file twice to the same dir creates
+        (converted), then (converted) (2).
+        """
         src = fixtures_dir / "img.png"
         out_dir = tmp_path / "collisions"
         out_dir.mkdir()
