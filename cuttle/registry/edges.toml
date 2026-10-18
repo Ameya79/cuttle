@@ -1,0 +1,451 @@
+# Conversion edges for Cuttle (Phase 1)
+# Single source of truth for what converts to what.
+# src, dst: format IDs from formats.toml
+# adapter: adapter name ('ffmpeg', 'image')
+# quality: 'lossless' | 'lossy' | 'best_effort'
+# cost: integer 1 (cheap) .. 10 (expensive)
+# label: display label for right-click menu
+# requires: optional list of external tools required (e.g. ['libreoffice'])
+# options: optional key-value settings for adapter
+
+# --- Video to Video / Audio / Animation (FFmpeg) ---
+
+# MP4 conversions
+[[edge]]
+src = "mp4"
+dst = "webm"
+adapter = "ffmpeg"
+quality = "lossy"
+cost = 5
+label = "WebM (video)"
+
+[[edge]]
+src = "mp4"
+dst = "gif"
+adapter = "ffmpeg"
+quality = "lossy"
+cost = 5
+label = "GIF (animation)"
+
+[[edge]]
+src = "mp4"
+dst = "mp3"
+adapter = "ffmpeg"
+quality = "lossy"
+cost = 3
+label = "MP3 (audio)"
+
+[[edge]]
+src = "mp4"
+dst = "wav"
+adapter = "ffmpeg"
+quality = "lossless"
+cost = 2
+label = "WAV (audio)"
+
+# MKV conversions
+[[edge]]
+src = "mkv"
+dst = "mp4"
+adapter = "ffmpeg"
+quality = "lossy"
+cost = 4
+label = "MP4 (video)"
+
+[[edge]]
+src = "mkv"
+dst = "webm"
+adapter = "ffmpeg"
+quality = "lossy"
+cost = 5
+label = "WebM (video)"
+
+[[edge]]
+src = "mkv"
+dst = "gif"
+adapter = "ffmpeg"
+quality = "lossy"
+cost = 5
+label = "GIF (animation)"
+
+[[edge]]
+src = "mkv"
+dst = "mp3"
+adapter = "ffmpeg"
+quality = "lossy"
+cost = 3
+label = "MP3 (audio)"
+
+[[edge]]
+src = "mkv"
+dst = "wav"
+adapter = "ffmpeg"
+quality = "lossless"
+cost = 2
+label = "WAV (audio)"
+
+# MOV conversions
+[[edge]]
+src = "mov"
+dst = "mp4"
+adapter = "ffmpeg"
+quality = "lossy"
+cost = 4
+label = "MP4 (video)"
+
+[[edge]]
+src = "mov"
+dst = "webm"
+adapter = "ffmpeg"
+quality = "lossy"
+cost = 5
+label = "WebM (video)"
+
+[[edge]]
+src = "mov"
+dst = "gif"
+adapter = "ffmpeg"
+quality = "lossy"
+cost = 5
+label = "GIF (animation)"
+
+[[edge]]
+src = "mov"
+dst = "mp3"
+adapter = "ffmpeg"
+quality = "lossy"
+cost = 3
+label = "MP3 (audio)"
+
+[[edge]]
+src = "mov"
+dst = "wav"
+adapter = "ffmpeg"
+quality = "lossless"
+cost = 2
+label = "WAV (audio)"
+
+# AVI conversions
+[[edge]]
+src = "avi"
+dst = "mp4"
+adapter = "ffmpeg"
+quality = "lossy"
+cost = 4
+label = "MP4 (video)"
+
+[[edge]]
+src = "avi"
+dst = "webm"
+adapter = "ffmpeg"
+quality = "lossy"
+cost = 5
+label = "WebM (video)"
+
+[[edge]]
+src = "avi"
+dst = "gif"
+adapter = "ffmpeg"
+quality = "lossy"
+cost = 5
+label = "GIF (animation)"
+
+[[edge]]
+src = "avi"
+dst = "mp3"
+adapter = "ffmpeg"
+quality = "lossy"
+cost = 3
+label = "MP3 (audio)"
+
+[[edge]]
+src = "avi"
+dst = "wav"
+adapter = "ffmpeg"
+quality = "lossless"
+cost = 2
+label = "WAV (audio)"
+
+# WebM conversions
+[[edge]]
+src = "webm"
+dst = "mp4"
+adapter = "ffmpeg"
+quality = "lossy"
+cost = 4
+label = "MP4 (video)"
+
+[[edge]]
+src = "webm"
+dst = "gif"
+adapter = "ffmpeg"
+quality = "lossy"
+cost = 5
+label = "GIF (animation)"
+
+[[edge]]
+src = "webm"
+dst = "mp3"
+adapter = "ffmpeg"
+quality = "lossy"
+cost = 3
+label = "MP3 (audio)"
+
+[[edge]]
+src = "webm"
+dst = "wav"
+adapter = "ffmpeg"
+quality = "lossless"
+cost = 2
+label = "WAV (audio)"
+
+# --- Audio to Audio (FFmpeg) ---
+
+[[edge]]
+src = "mp3"
+dst = "wav"
+adapter = "ffmpeg"
+quality = "lossless"
+cost = 2
+label = "WAV (audio)"
+
+[[edge]]
+src = "wav"
+dst = "mp3"
+adapter = "ffmpeg"
+quality = "lossy"
+cost = 3
+label = "MP3 (audio)"
+
+# --- Image conversions (Pillow/image adapter) ---
+
+# PNG conversions
+[[edge]]
+src = "png"
+dst = "jpg"
+adapter = "image"
+quality = "lossy"
+cost = 2
+label = "JPG (image)"
+
+[[edge]]
+src = "png"
+dst = "webp"
+adapter = "image"
+quality = "lossy"
+cost = 3
+label = "WebP (image)"
+
+[[edge]]
+src = "png"
+dst = "bmp"
+adapter = "image"
+quality = "lossless"
+cost = 1
+label = "BMP (image)"
+
+[[edge]]
+src = "png"
+dst = "tiff"
+adapter = "image"
+quality = "lossless"
+cost = 2
+label = "TIFF (image)"
+
+# JPG conversions
+[[edge]]
+src = "jpg"
+dst = "png"
+adapter = "image"
+quality = "lossless"
+cost = 2
+label = "PNG (image)"
+
+[[edge]]
+src = "jpg"
+dst = "webp"
+adapter = "image"
+quality = "lossy"
+cost = 3
+label = "WebP (image)"
+
+[[edge]]
+src = "jpg"
+dst = "bmp"
+adapter = "image"
+quality = "lossless"
+cost = 1
+label = "BMP (image)"
+
+[[edge]]
+src = "jpg"
+dst = "tiff"
+adapter = "image"
+quality = "lossless"
+cost = 2
+label = "TIFF (image)"
+
+# WebP conversions
+[[edge]]
+src = "webp"
+dst = "png"
+adapter = "image"
+quality = "lossless"
+cost = 2
+label = "PNG (image)"
+
+[[edge]]
+src = "webp"
+dst = "jpg"
+adapter = "image"
+quality = "lossy"
+cost = 2
+label = "JPG (image)"
+
+[[edge]]
+src = "webp"
+dst = "bmp"
+adapter = "image"
+quality = "lossless"
+cost = 1
+label = "BMP (image)"
+
+[[edge]]
+src = "webp"
+dst = "tiff"
+adapter = "image"
+quality = "lossless"
+cost = 2
+label = "TIFF (image)"
+
+# BMP conversions
+[[edge]]
+src = "bmp"
+dst = "png"
+adapter = "image"
+quality = "lossless"
+cost = 2
+label = "PNG (image)"
+
+[[edge]]
+src = "bmp"
+dst = "jpg"
+adapter = "image"
+quality = "lossy"
+cost = 2
+label = "JPG (image)"
+
+[[edge]]
+src = "bmp"
+dst = "webp"
+adapter = "image"
+quality = "lossy"
+cost = 3
+label = "WebP (image)"
+
+[[edge]]
+src = "bmp"
+dst = "tiff"
+adapter = "image"
+quality = "lossless"
+cost = 2
+label = "TIFF (image)"
+
+# TIFF conversions
+[[edge]]
+src = "tiff"
+dst = "png"
+adapter = "image"
+quality = "lossless"
+cost = 2
+label = "PNG (image)"
+
+[[edge]]
+src = "tiff"
+dst = "jpg"
+adapter = "image"
+quality = "lossy"
+cost = 2
+label = "JPG (image)"
+
+[[edge]]
+src = "tiff"
+dst = "webp"
+adapter = "image"
+quality = "lossy"
+cost = 3
+label = "WebP (image)"
+
+[[edge]]
+src = "tiff"
+dst = "bmp"
+adapter = "image"
+quality = "lossless"
+cost = 1
+label = "BMP (image)"
+
+# HEIC conversions
+[[edge]]
+src = "heic"
+dst = "jpg"
+adapter = "image"
+quality = "lossy"
+cost = 2
+label = "JPG (image)"
+
+[[edge]]
+src = "heic"
+dst = "png"
+adapter = "image"
+quality = "lossless"
+cost = 2
+label = "PNG (image)"
+
+[[edge]]
+src = "heic"
+dst = "webp"
+adapter = "image"
+quality = "lossy"
+cost = 3
+label = "WebP (image)"
+
+[[edge]]
+src = "heic"
+dst = "bmp"
+adapter = "image"
+quality = "lossless"
+cost = 1
+label = "BMP (image)"
+
+[[edge]]
+src = "heic"
+dst = "tiff"
+adapter = "image"
+quality = "lossless"
+cost = 2
+label = "TIFF (image)"
+
+# GIF (as source image) conversions
+[[edge]]
+src = "gif"
+dst = "png"
+adapter = "image"
+quality = "lossless"
+cost = 2
+label = "PNG (image)"
+
+[[edge]]
+src = "gif"
+dst = "jpg"
+adapter = "image"
+quality = "lossy"
+cost = 2
+label = "JPG (image)"
+
+[[edge]]
+src = "gif"
+dst = "webp"
+adapter = "image"
+quality = "lossy"
+cost = 3
+label = "WebP (image)"

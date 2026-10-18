@@ -1,0 +1,75 @@
+# Format definitions for Cuttle (Phase 1)
+# Single source of truth for supported formats.
+# kind: 'video' | 'audio' | 'image' | 'document'
+# ext: list of file extensions without dot
+# magic: identifier matched by detect.py
+
+[formats.mp4]
+kind = "video"
+ext = ["mp4", "m4v"]
+magic = "ftyp"
+
+[formats.mkv]
+kind = "video"
+ext = ["mkv"]
+magic = "matroska"
+
+[formats.mov]
+kind = "video"
+ext = ["mov"]
+magic = "moov_or_qt"
+
+[formats.avi]
+kind = "video"
+ext = ["avi"]
+magic = "riff_avi"
+
+[formats.webm]
+kind = "video"
+ext = ["webm"]
+magic = "matroska"
+
+[formats.mp3]
+kind = "audio"
+ext = ["mp3"]
+magic = "id3_or_frame"
+
+[formats.wav]
+kind = "audio"
+ext = ["wav"]
+magic = "riff_wave"
+
+[formats.gif]
+kind = "image"
+ext = ["gif"]
+magic = "gif"
+
+[formats.png]
+kind = "image"
+ext = ["png"]
+magic = "png"
+
+[formats.jpg]
+kind = "image"
+ext = ["jpg", "jpeg"]
+magic = "jpeg"
+
+[formats.webp]
+kind = "image"
+ext = ["webp"]
+magic = "riff_webp"
+
+[formats.bmp]
+kind = "image"
+ext = ["bmp"]
+magic = "bmp"
+
+[formats.tiff]
+kind = "image"
+ext = ["tiff", "tif"]
+magic = "tiff"
+
+[formats.heic]
+kind = "image"
+ext = ["heic", "heif"]
+magic = "ftyp_heic"
