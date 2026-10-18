@@ -16,7 +16,6 @@ from unittest.mock import MagicMock, patch
 from cuttle.platform.windows.toast import (
     ToastNotifier,
     notify_shell_file_created,
-    notify_success,
 )
 from cuttle.ui.progress_window import FloatingProgressWindow, get_or_create_app
 
