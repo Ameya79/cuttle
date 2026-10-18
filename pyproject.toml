@@ -1,0 +1,66 @@
+[project]
+name = "cuttle"
+version = "0.1.0"
+description = "Right-click any file, pick a format, get a converted copy. Offline, open-source, Windows."
+readme = "README.md"
+license = "GPL-3.0-only"
+requires-python = ">=3.12"
+authors = [
+    { name = "Vinay" },
+]
+keywords = ["file-converter", "ffmpeg", "right-click", "windows", "offline"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Win32 (MS Windows)",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Operating System :: Microsoft :: Windows",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Multimedia :: Video :: Conversion",
+    "Topic :: Multimedia :: Sound/Audio :: Conversion",
+]
+
+dependencies = [
+    "typer>=0.9",
+    "filetype>=1.2",
+    "Pillow>=10.0",
+    "pillow-heif>=0.13",
+    "psutil>=5.9",
+]
+
+[project.scripts]
+cuttle = "cuttle.cli:app"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "A", "SIM", "RUF"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+
+[[tool.mypy.overrides]]
+module = ["filetype", "filetype.*", "pillow_heif", "pillow_heif.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v --tb=short"
+
+[dependency-groups]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "ruff>=0.4",
+    "mypy>=1.8",
+    "hypothesis>=6.0",
+]

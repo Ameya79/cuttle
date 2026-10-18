@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Morph explained: the right-click file converter</title>
+<style>
+:root{--ink:#1d2433;--mute:#5b6577;--line:#e4e8ef;--soft:#f5f7fb;--blue:#2f6bff;--green:#16a36a;--amber:#e69a10;--red:#e0483e}
+*{box-sizing:border-box}
+body{margin:0;background:#fff;color:var(--ink);font:17px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:900px;margin:0 auto;padding:0 20px 80px}
+header{padding:56px 0 28px;border-bottom:1px solid var(--line)}
+header h1{font-size:40px;line-height:1.15;margin:0 0 12px}
+header p{color:var(--mute);font-size:19px;margin:0;max-width:640px}
+nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+nav a{font-size:14px;color:var(--blue);text-decoration:none;border:1px solid var(--line);padding:5px 12px;border-radius:99px}
+section{padding:46px 0 6px}
+h2{font-size:28px;margin:0 0 6px}
+.tag{display:inline-block;font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--blue);text-transform:uppercase;margin-bottom:6px}
+p{margin:10px 0}
+.lead{color:var(--mute)}
+.card{border:1px solid var(--line);border-radius:14px;padding:18px 20px;background:#fff}
+.soft{background:var(--soft);border-color:var(--soft)}
+.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));margin:18px 0}
+.grid .card h3{margin:0 0 6px;font-size:17px}
+.grid .card p{margin:0;font-size:15px;color:var(--mute)}
+svg{max-width:100%;height:auto;display:block;margin:18px auto}
+.steps{counter-reset:s;list-style:none;padding:0;margin:18px 0}
+.steps li{counter-increment:s;position:relative;padding:12px 16px 12px 56px;border:1px solid var(--line);border-radius:12px;margin-bottom:10px}
+.steps li:before{content:counter(s);position:absolute;left:14px;top:12px;width:28px;height:28px;border-radius:50%;background:var(--blue);color:#fff;font-weight:700;text-align:center;line-height:28px}
+.menu{width:290px;border:1px solid #cfd6e4;border-radius:10px;box-shadow:0 8px 24px rgba(30,40,70,.12);padding:6px;font-size:14px;background:#fff}
+.menu div{padding:7px 12px;border-radius:6px;color:#333}
+.menu .hi{background:#e8f0ff;color:#1b4fd0;font-weight:600}
+.menu small{color:var(--mute);font-weight:400}
+.menu hr{border:0;border-top:1px solid var(--line);margin:4px 0}
+.toast{width:300px;border:1px solid var(--line);border-radius:12px;padding:12px 14px;box-shadow:0 8px 24px rgba(30,40,70,.12);font-size:14px}
+.bar{height:8px;background:#e8ecf4;border-radius:9px;overflow:hidden;margin:8px 0}
+.bar i{display:block;height:100%;width:64%;background:var(--green)}
+.row{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start;justify-content:center;margin:18px 0}
+.pill{display:inline-block;font-size:12px;font-weight:700;padding:2px 9px;border-radius:99px;color:#fff}
+.g{background:var(--green)}.a{background:var(--amber)}.r{background:var(--red)}
+.issue{border-left:4px solid var(--amber);background:var(--soft);padding:12px 16px;border-radius:0 12px 12px 0;margin:12px 0}
+.issue b{display:block}
+.issue span{color:var(--green);font-weight:600}
+.tl{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0}
+.tl div{flex:1 1 120px;border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:14px}
+.tl b{display:block;color:var(--blue)}
+footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);color:var(--mute);font-size:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+<div class="tag">Project guide</div>
+<h1>Morph: convert any file with one right-click</h1>
+<p>This page explains the whole idea from zero. No tech background needed. By the end you will know how it works, how it looks, what can go wrong, and how it gets onto people’s computers.</p>
+<nav><a href="#what">What it is</a><a href="#how">How it works</a><a href="#tools">The tools inside</a><a href="#safe">Why files stay safe</a><a href="#ux">What you see</a><a href="#issues">Problems and fixes</a><a href="#ship">Getting it to people</a><a href="#road">Build order</a></nav>
+</header>
+
+<section id="what">
+<div class="tag">1. The idea</div>
+<h2>You right-click. Morph converts. That’s it.</h2>
+<p class="lead">Normally, turning a video into music means searching Google, finding a website, uploading your file, waiting, and downloading it back. Morph removes all of that. It lives inside the menu you already use.</p>
+<div class="row">
+<div class="menu">
+<div>Open</div><div>Copy</div><div>Delete</div><hr>
+<div class="hi">Morph &#9656; Convert to</div><hr>
+<div>&nbsp;&nbsp;&nbsp;MP3 <small>(audio, small loss)</small></div>
+<div>&nbsp;&nbsp;&nbsp;GIF</div>
+<div>&nbsp;&nbsp;&nbsp;WEBM</div>
+</div>
+<div class="card soft" style="max-width:340px"><b>Say you right-click holiday.mp4</b><p>Morph shows only things that make sense for a video: audio, GIF, another video type. It will never offer “convert to Word” on a video.</p></div>
+</div>
+<div class="grid">
+<div class="card"><h3>Works offline</h3><p>Your files never leave your computer. Good for ID cards, contracts and drawings.</p></div>
+<div class="card"><h3>Free and open</h3><p>Anyone can read the code, check it, and help improve it.</p></div>
+<div class="card"><h3>No app to open</h3><p>No window to find, no account to make. Right-click, pick, done.</p></div>
+</div>
+</section>
+
+<section id="how">
+<div class="tag">2. Behind the click</div>
+<h2>What happens in the 2 seconds after you click</h2>
+<svg viewBox="0 0 820 150" width="820" role="img" aria-label="Four step flow from click to finished file">
+<g font-family="system-ui,sans-serif" font-size="14" text-anchor="middle">
+<rect x="10" y="30" width="170" height="80" rx="12" fill="#eaf1ff" stroke="#2f6bff"/><text x="95" y="62" font-weight="700" fill="#1b4fd0">1. Menu</text><text x="95" y="84" fill="#333">You pick MP3</text>
+<rect x="225" y="30" width="170" height="80" rx="12" fill="#fff6e0" stroke="#e69a10"/><text x="310" y="62" font-weight="700" fill="#9a6500">2. Helper</text><text x="310" y="84" fill="#333">Always running, tiny</text>
+<rect x="440" y="30" width="170" height="80" rx="12" fill="#eafaf2" stroke="#16a36a"/><text x="525" y="62" font-weight="700" fill="#0b7a4d">3. Engine</text><text x="525" y="84" fill="#333">Picks the right tool</text>
+<rect x="655" y="30" width="155" height="80" rx="12" fill="#f3ecff" stroke="#7a4dd8"/><text x="732" y="62" font-weight="700" fill="#5a31b0">4. New file</text><text x="732" y="84" fill="#333">Saved next to old</text>
+<path d="M180 70h45M395 70h45M610 70h45" stroke="#5b6577" stroke-width="2" fill="none"/>
+<path d="M219 64l8 6-8 6M434 64l8 6-8 6M649 64l8 6-8 6" stroke="#5b6577" stroke-width="2" fill="none"/>
+</g></svg>
+<ol class="steps">
+<li><b>The menu</b> only passes a message: “please turn these files into MP3”. It does no heavy work, so your File Explorer never freezes.</li>
+<li><b>The helper</b> is a small program that stays quietly in the background. Because it is already awake, your click feels instant.</li>
+<li><b>The engine</b> checks what the file really is (not just its name), picks the best tool, and runs it.</li>
+<li><b>The result</b> is a brand new file placed beside the original. A pop-up tells you it’s done.</li>
+</ol>
+</section>
+
+<section id="tools">
+<div class="tag">3. The tools inside</div>
+<h2>Morph is the waiter. Free tools are the chefs.</h2>
+<p class="lead">Great free programs already convert files perfectly well. The catch is that they need typed commands, so normal people can’t use them. Morph is the friendly front desk.</p>
+<div class="grid">
+<div class="card"><h3>FFmpeg</h3><p>Chef for video and audio. MP4 to MP3, GIFs, and more.</p></div>
+<div class="card"><h3>LibreOffice</h3><p>Chef for office files. Word, PowerPoint and Excel into PDF. It’s large, so it’s an optional download.</p></div>
+<div class="card"><h3>Pandoc</h3><p>Chef for text. Markdown, web pages, Word and plain text.</p></div>
+<div class="card"><h3>Image tools</h3><p>Chef for photos. PNG, JPG, WEBP, and iPhone HEIC photos.</p></div>
+</div>
+<p>How good is each result? Morph tells you honestly with a label:</p>
+<p><span class="pill g">Lossless</span> nothing lost &nbsp; <span class="pill a">Lossy</span> a little detail lost, like MP3 &nbsp; <span class="pill r">Best effort</span> may need touch-ups, like PDF to Word</p>
+<div class="issue"><b>Why is PDF to Word “best effort”?</b>A PDF is like a photo of a page: it knows where each letter sits, but not what a paragraph or a table is. Every converter has to guess. So Morph tells you up front instead of pretending it’s perfect.</div>
+</section>
+
+<section id="safe">
+<div class="tag">4. Trust</div>
+<h2>How we keep your files from getting damaged</h2>
+<p class="lead">No converter can promise perfect results. What Morph can promise is that your original is never touched, and that you never get a broken half-file.</p>
+<svg viewBox="0 0 820 130" width="820" role="img" aria-label="Safe copy process">
+<g font-family="system-ui,sans-serif" font-size="14" text-anchor="middle">
+<rect x="10" y="25" width="150" height="70" rx="12" fill="#f5f7fb" stroke="#cfd6e4"/><text x="85" y="55" font-weight="700">Original</text><text x="85" y="77" fill="#5b6577">read only</text>
+<rect x="195" y="25" width="150" height="70" rx="12" fill="#fff6e0" stroke="#e69a10"/><text x="270" y="55" font-weight="700">Temp copy</text><text x="270" y="77" fill="#5b6577">work happens here</text>
+<rect x="380" y="25" width="150" height="70" rx="12" fill="#eaf1ff" stroke="#2f6bff"/><text x="455" y="55" font-weight="700">Check it</text><text x="455" y="77" fill="#5b6577">opens? right length?</text>
+<rect x="565" y="25" width="245" height="70" rx="12" fill="#eafaf2" stroke="#16a36a"/><text x="687" y="55" font-weight="700">Rename to final</text><text x="687" y="77" fill="#5b6577">only if the check passed</text>
+<path d="M160 60h35M345 60h35M530 60h35" stroke="#5b6577" stroke-width="2"/>
+</g></svg>
+<ul>
+<li>If the check fails, the temp file is deleted. You never see a broken file.</li>
+<li>If a file with the same name exists, Morph adds a number. It never overwrites.</li>
+<li>Tests compare the original before and after every conversion. They must be identical.</li>
+</ul>
+</section>
+
+<section id="ux">
+<div class="tag">5. What you see</div>
+<h2>The experience, screen by screen</h2>
+<div class="row">
+<div class="toast"><b>Converting holiday.mp4</b><div class="bar"><i></i></div><small>64% &middot; to MP3 &middot; <u>Cancel</u></small></div>
+<div class="toast"><b>&#10003; Done: holiday.mp3</b><br><small>Open &nbsp;|&nbsp; Show in folder</small></div>
+</div>
+<div class="grid">
+<div class="card"><h3>Fast feedback</h3><p>Something appears within 1 second of your click, so you know it worked.</p></div>
+<div class="card"><h3>One window for many files</h3><p>Convert 30 photos and you get one progress box, not 30 pop-ups.</p></div>
+<div class="card"><h3>Plain error messages</h3><p>“This PDF has a password. Enter it to continue.” Never a code like Error 0x8007.</p></div>
+<div class="card"><h3>Tiny settings page</h3><p>Where to save, name style, how many at once. Deleting originals is off by default.</p></div>
+</div>
+</section>
+
+<section id="issues">
+<div class="tag">6. Reality check</div>
+<h2>What will go wrong, and the plan for each</h2>
+<div class="issue"><b>Windows 11 hides the menu behind “Show more options”</b><span>Plan:</span> launch with the classic menu, then build the proper top-level entry in a later phase. The first-run screen shows users where to look in the meantime.</div>
+<div class="issue"><b>Windows warns “protected your PC” on unsigned apps</b><span>Plan:</span> sign the app, publish through winget, and share file fingerprints (hashes) so anyone can verify the download.</div>
+<div class="issue"><b>Antivirus wrongly flags the app</b><span>Plan:</span> build the app in public automated builds, sign it, and report false alarms to the antivirus companies.</div>
+<div class="issue"><b>First click feels slow</b><span>Plan:</span> keep the small helper running in the background so there is no wake-up delay.</div>
+<div class="issue"><b>PDF to Word looks messy, DWG drawings are locked-up formats</b><span>Plan:</span> ship them last, label them “best effort”, and keep a public page showing what works well and what doesn’t. For DWG, only use tools whose license allows it, and never bundle the ones that don’t.</div>
+<div class="issue"><b>The app gets big</b><span>Plan:</span> core tools only in the main download. Large extras (LibreOffice, OCR, DWG) are optional downloads.</div>
+<div class="issue"><b>Strange files: huge, password-protected, broken, open in another app, odd names</b><span>Plan:</span> check disk space first, ask for passwords, retry once for locked files, support long and non-English names, and test all of this on purpose with a pile of nasty sample files.</div>
+<div class="issue"><b>Files from strangers can be hostile</b><span>Plan:</span> keep tools updated, set time limits, stop runaway programs completely, and block internet access for the converters.</div>
+<div class="issue"><b>Everyone asks for a new format</b><span>Plan:</span> formats are simple entries in a list, so community contributors can add them with a test file.</div>
+</section>
+
+<section id="ship">
+<div class="tag">7. Getting it onto computers</div>
+<h2>How people download and install it</h2>
+<ol class="steps">
+<li><b>GitHub Releases.</b> An installer, a no-install zip, and a fingerprint file. Built automatically every time you tag a version.</li>
+<li><b>winget.</b> Windows’ built-in app installer. People type one line, or you add a button, and updates become easy.</li>
+<li><b>Your website.</b> A big Download button, a short demo GIF, and one clear promise: “your files never leave your PC”.</li>
+<li><b>Optional: Microsoft Store and Scoop/Chocolatey.</b> Extra reach. Check the Store’s current rules for apps that add menu entries first.</li>
+</ol>
+<div class="card soft"><b>The installer must:</b> work without admin rights, remove every trace when uninstalled, and download big extras only when the user agrees, with the size shown first.</div>
+</section>
+
+<section id="road">
+<div class="tag">8. Build order</div>
+<h2>Small steps, each one tested before the next</h2>
+<div class="tl">
+<div><b>Phase 0</b>Talk to 10 people. Pick the top conversions.</div>
+<div><b>Phase 1</b>Engine on the command line: video, audio, images.</div>
+<div><b>Phase 2</b>Right-click menu, helper, installer.</div>
+<div><b>Phase 3</b>Office files to PDF, folders.</div>
+<div><b>Phase 4</b>Windows 11 top menu, speed.</div>
+<div><b>Phase 5</b>PDF to Word, OCR, DWG.</div>
+<div><b>Phase 6</b>Signing, winget, beta, launch.</div>
+</div>
+<p class="lead">The rule that saves the project: ship the boring, reliable parts first. A small tool that never breaks earns more trust than a big one that sometimes does. The full details live in the PRD, TRD and phase plan doc.</p>
+</section>
+
+<footer>Morph is a working name. This page is a plain-language companion to the PRD and TRD, and it’s meant to be saved and shared.</footer>
+</div>
+</body>
+</html>
