@@ -20,7 +20,7 @@ from cuttle.platform.windows.pipe import call_pipe, get_default_pipe_name
 
 def ensure_worker_running(
     pipe_name: str | None = None,
-    timeout_s: float = 3.0,
+    timeout_s: float = 6.0,
 ) -> str:
     """Ensure background worker daemon is active; launch if missing.
 
