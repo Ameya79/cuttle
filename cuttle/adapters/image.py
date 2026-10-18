@@ -14,7 +14,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import pillow_heif
-from PIL import Image, ImageOps
+from PIL import Image, ImageOps, UnidentifiedImageError
 
 from cuttle.adapters.base import BaseAdapter
 from cuttle.engine.errors import CuttleError
@@ -175,7 +175,7 @@ class ImageAdapter(BaseAdapter):
 
         except CuttleError:
             raise
-        except (Image.UnidentifiedImageError, OSError, ValueError) as err:
+        except (UnidentifiedImageError, OSError, ValueError) as err:
             raise CuttleError(
                 code="E_SRC_CORRUPT",
                 user_message=f"Could not read image file: {src.name}",

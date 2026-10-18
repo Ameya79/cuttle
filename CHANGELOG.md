@@ -5,6 +5,21 @@ All notable changes to Cuttle will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.2.0] - Phase 2: Windows Desktop Integration & Background Worker
+
+### Added
+- **Windows Job Object process tree termination (P2-01)**: `cuttle/platform/windows/jobobject.py` wrapping Win32 Job Objects with `JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE` to guarantee instantaneous child and grandchild process termination on cancellation or exit.
+- **SQLite state database & startup recovery (P2-02)**: `cuttle/worker/db.py` in WAL mode managing `%LOCALAPPDATA%\Cuttle\state.db`, with crash recovery marking orphaned interrupted jobs as failed (`E_TOOL_FAILED`).
+- **Job queue & concurrency controller (P2-03)**: `cuttle/worker/queue.py` capping parallel conversions to half of CPU cores, providing isolated failure containment and token-based cancellation.
+- **Named pipe IPC server & 300ms multi-select batching (P2-04)**: `cuttle/platform/windows/pipe.py` and `cuttle/worker/pipe_server.py` supporting sub-10ms IPC on `\\.\pipe\cuttle-<username>` and bundling rapid Explorer multi-select clicks into unified batches.
+- **Fast launcher cuttlectl (P2-05)**: `cuttle/worker/cuttlectl.py` sub-20ms right-click launcher with auto-start of detached worker daemon and pipe communication.
+- **Floating progress window (P2-06)**: `cuttle/ui/progress_window.py` PySide6 dark frameless floating window positioned at bottom-right displaying per-job and batch progress bars with individual and batch cancellation buttons.
+- **Native Windows toast notifications (P2-07)**: `cuttle/platform/windows/toast.py` using `windows-toasts` with interactive quick-action buttons ("Open File", "Show in Folder", "Copy Details") and graceful exception fallback.
+- **File Explorer registry installer (P2-08)**: `cuttle/shell/registry_installer.py` dynamically registering cascading context menus in `HKCU\Software\Classes` (zero admin rights) with leave-no-trace uninstallation via audit manifest.
+- **System tray icon & settings (P2-09)**: `cuttle/worker/tray.py` and `settings.py` providing background tray presence with real-time conversion status, `settings.toml` store, and zero-admin Windows Run autostart.
+- **Packaging & Inno Setup installer (P2-10)**: `packaging/cuttle.spec` for standalone PyInstaller freeze of `cuttle.exe`, `cuttlectl.exe` (windowless), and `cuttle-worker.exe` (windowless daemon), plus `packaging/installer.iss` for automated setup and clean uninstallation.
+- **Windows integration verification (P2-11)**: `tests/integration/test_windows_pipeline.py` validating end-to-end multi-file debouncing, parallel queue execution, live progress events, and clean registry removal.
+
 ## [0.1.0] - Phase 1: Core Engine & CLI
 
 ### Added
