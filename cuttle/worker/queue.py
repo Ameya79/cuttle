@@ -16,7 +16,7 @@ import os
 import threading
 import time
 import uuid
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
 from enum import StrEnum
 from pathlib import Path
@@ -173,7 +173,7 @@ class JobQueue:
     def submit_batch(
         self,
         batch_id: str,
-        items: list[tuple[Path | str, str]],
+        items: Sequence[tuple[Path | str, str]],
         *,
         out_dir: Path | None = None,
     ) -> list[str]:
