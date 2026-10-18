@@ -240,3 +240,7 @@ def detect(src: Path, registry: Registry | None = None) -> DetectedFormat:
         )
 
     return DetectedFormat(chosen_fmt, warnings)
+
+
+# Export alias for engine conversion pipeline
+detect_format = detect
