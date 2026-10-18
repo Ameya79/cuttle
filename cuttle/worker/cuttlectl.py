@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import sys
 import time
@@ -46,12 +47,25 @@ def ensure_worker_running(
             subprocess, "DETACHED_PROCESS", 0
         )
 
-    cmd = [sys.executable, "-m", "cuttle.worker.main"]
+    project_root = Path(__file__).resolve().parent.parent.parent
+    py_exec = sys.executable
+    if sys.platform == "win32":
+        candidate_pythonw = Path(sys.executable).with_name("pythonw.exe")
+        if candidate_pythonw.is_file():
+            py_exec = str(candidate_pythonw)
+            creationflags = getattr(subprocess, "DETACHED_PROCESS", 0)
+
+    cmd = [py_exec, "-m", "cuttle.worker.main"]
     if pipe_name:
         cmd.extend(["--pipe", pipe_name])
 
+    env = os.environ.copy()
+    env["PYTHONPATH"] = str(project_root)
+
     subprocess.Popen(
         cmd,
+        cwd=str(project_root),
+        env=env,
         creationflags=creationflags,
         close_fds=True,
     )

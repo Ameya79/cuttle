@@ -105,6 +105,7 @@ class CuttleWorkerDaemon:
 
                 bridge = UIEventBridge()
                 app = get_or_create_app()
+                app.setQuitOnLastWindowClosed(False)
 
                 tray = CuttleTrayIcon()
                 tray.show()
@@ -182,6 +183,21 @@ class CuttleWorkerDaemon:
 
 
 def main(argv: list[str] | None = None) -> int:
+    import os
+
+    local_app_data = os.environ.get("LOCALAPPDATA")
+    base = Path(local_app_data) if local_app_data else Path.home() / "AppData" / "Local"
+    log_dir = base / "Cuttle"
+    log_dir.mkdir(parents=True, exist_ok=True)
+    log_file = log_dir / "worker.log"
+
+    logging.basicConfig(
+        filename=str(log_file),
+        level=logging.DEBUG,
+        format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    )
+    logger.info("Starting Cuttle worker daemon process (PID %d)...", os.getpid())
+
     parser = argparse.ArgumentParser(description="Cuttle background worker daemon")
     parser.add_argument("--pipe", default=None, help="Custom named pipe name")
     parser.add_argument("--db", default=None, type=Path, help="Custom SQLite DB path")
@@ -195,7 +211,11 @@ def main(argv: list[str] | None = None) -> int:
         max_workers=args.workers,
         headless=args.headless,
     )
-    daemon.start()
+    try:
+        daemon.start()
+    except Exception as exc:
+        logger.exception("Daemon crash in start(): %s", exc)
+        return 1
     return 0
 
 

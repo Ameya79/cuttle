@@ -77,6 +77,19 @@ def copy_to_clipboard(text: str) -> bool:
         return False
 
 
+def notify_shell_file_created(path: Path | str) -> None:
+    """Notify Windows Shell that a new file was created to instantly refresh Explorer views."""
+    if sys.platform != "win32":
+        return
+    try:
+        import ctypes
+
+        # SHCNE_CREATE = 0x00000002, SHCNF_PATHW = 0x0005
+        ctypes.windll.shell32.SHChangeNotify(0x00000002, 0x0005, str(Path(path).resolve()), None)
+    except Exception as exc:
+        logger.debug("SHChangeNotify error: %s", exc)
+
+
 class ToastNotifier:
     """Native Windows toast notification sender for Cuttle."""
 
@@ -85,11 +98,11 @@ class ToastNotifier:
         self._toaster: Any = None
         if sys.platform == "win32":
             try:
-                from windows_toasts import WindowsToaster
+                from windows_toasts import InteractableWindowsToaster
 
-                self._toaster = WindowsToaster(app_id)
+                self._toaster = InteractableWindowsToaster(app_id)
             except Exception as exc:
-                logger.warning("Could not initialize WindowsToaster: %s", exc)
+                logger.warning("Could not initialize InteractableWindowsToaster: %s", exc)
 
     def create_success_toast(
         self, output_path: Path | str, original_filename: str | None = None
@@ -146,6 +159,9 @@ class ToastNotifier:
 
         Returns True if dispatched to Windows, False if failed/disabled.
         """
+        # Immediately tell Windows File Explorer to refresh and display the new file
+        notify_shell_file_created(output_path)
+
         if self._toaster is None:
             return False
 
