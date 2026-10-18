@@ -10,13 +10,13 @@ Per TRD §6.5, Hard rules, and task card P1-08:
 
 from __future__ import annotations
 
-from collections.abc import Callable
+import contextlib
 import io
-from pathlib import Path
 import subprocess
-import sys
 import threading
 import time
+from collections.abc import Callable
+from pathlib import Path
 
 import psutil
 
@@ -30,14 +30,10 @@ def kill_process_tree(pid: int) -> None:
         parent = psutil.Process(pid)
         children = parent.children(recursive=True)
         for child in children:
-            try:
+            with contextlib.suppress(psutil.NoSuchProcess, psutil.AccessDenied):
                 child.kill()
-            except (psutil.NoSuchProcess, psutil.AccessDenied):
-                pass
-        try:
+        with contextlib.suppress(psutil.NoSuchProcess, psutil.AccessDenied):
             parent.kill()
-        except (psutil.NoSuchProcess, psutil.AccessDenied):
-            pass
     except (psutil.NoSuchProcess, psutil.AccessDenied):
         pass
 
@@ -56,10 +52,8 @@ def _read_stdout_stream(
     except (ValueError, OSError):
         pass
     finally:
-        try:
+        with contextlib.suppress(Exception):
             stream.close()
-        except Exception:
-            pass
 
 
 def run_command(
@@ -97,9 +91,7 @@ def run_command(
         )
 
     # Windows creation flag: suppress creation of separate console window
-    creationflags = 0
-    if sys.platform == "win32":
-        creationflags = subprocess.CREATE_NO_WINDOW  # type: ignore[attr-defined]
+    creationflags = getattr(subprocess, "CREATE_NO_WINDOW", 0)
 
     proc = subprocess.Popen(
         argv,
@@ -129,10 +121,8 @@ def run_command(
             # 1. Check cancellation
             if cancel is not None and cancel.cancelled:
                 kill_process_tree(proc.pid)
-                try:
+                with contextlib.suppress(subprocess.TimeoutExpired):
                     proc.wait(timeout=2)
-                except subprocess.TimeoutExpired:
-                    pass
                 raise CuttleError(
                     code="E_CANCELLED",
                     user_message="The conversion was cancelled.",
@@ -143,10 +133,8 @@ def run_command(
             elapsed = time.monotonic() - start_time
             if timeout_s is not None and elapsed > timeout_s:
                 kill_process_tree(proc.pid)
-                try:
+                with contextlib.suppress(subprocess.TimeoutExpired):
                     proc.wait(timeout=2)
-                except subprocess.TimeoutExpired:
-                    pass
                 raise CuttleError(
                     code="E_TIMEOUT",
                     user_message="The conversion took too long and was stopped.",
@@ -166,10 +154,13 @@ def run_command(
 
         if retcode != 0:
             if cancel is not None and cancel.cancelled:
+                detail_msg = (
+                    f"Process exited {retcode} following cancellation: {stderr_text.strip()}"
+                )
                 raise CuttleError(
                     code="E_CANCELLED",
                     user_message="The conversion was cancelled.",
-                    detail=f"Process exited {retcode} following cancellation: {stderr_text.strip()}",
+                    detail=detail_msg,
                 )
             raise CuttleError(
                 code="E_TOOL_FAILED",
@@ -181,10 +172,8 @@ def run_command(
 
     except (CuttleError, Exception):
         kill_process_tree(proc.pid)
-        try:
+        with contextlib.suppress(subprocess.TimeoutExpired):
             proc.wait(timeout=2)
-        except subprocess.TimeoutExpired:
-            pass
         if reader_thread is not None:
             reader_thread.join(timeout=0.5)
         raise

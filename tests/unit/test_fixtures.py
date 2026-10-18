@@ -111,6 +111,5 @@ def test_locked_file_fixture(locked_file: Path) -> None:
         import msvcrt
 
         assert locked_file.exists()
-        with open(locked_file, "r+b") as second_handle:
-            with pytest.raises(OSError):
-                msvcrt.locking(second_handle.fileno(), msvcrt.LK_NBLCK, 1)
+        with open(locked_file, "r+b") as second_handle, pytest.raises(OSError):
+            msvcrt.locking(second_handle.fileno(), msvcrt.LK_NBLCK, 1)

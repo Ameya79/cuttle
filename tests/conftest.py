@@ -8,11 +8,10 @@ Per TRD §6.10:
 
 from __future__ import annotations
 
-from collections.abc import Generator
-from contextlib import contextmanager
-import os
-from pathlib import Path
 import sys
+from collections.abc import Generator
+from contextlib import contextmanager, suppress
+from pathlib import Path
 
 import pytest
 
@@ -35,30 +34,23 @@ def acquire_file_lock(file_path: Path) -> Generator[Path, None, None]:
     if sys.platform == "win32":
         import msvcrt
 
-        f = open(file_path, "r+b")
-        try:
-            # Lock the first byte exclusively and non-blocking
+        with open(file_path, "r+b") as f:
             msvcrt.locking(f.fileno(), msvcrt.LK_NBLCK, 1)
-            yield file_path
-        finally:
             try:
-                msvcrt.locking(f.fileno(), msvcrt.LK_UNLCK, 1)
-            except OSError:
-                pass
-            f.close()
+                yield file_path
+            finally:
+                with suppress(OSError):
+                    msvcrt.locking(f.fileno(), msvcrt.LK_UNLCK, 1)
     else:
         import fcntl
 
-        f = open(file_path, "r+b")
-        try:
+        with open(file_path, "r+b") as f:
             fcntl.flock(f.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
-            yield file_path
-        finally:
             try:
-                fcntl.flock(f.fileno(), fcntl.LOCK_UN)
-            except OSError:
-                pass
-            f.close()
+                yield file_path
+            finally:
+                with suppress(OSError):
+                    fcntl.flock(f.fileno(), fcntl.LOCK_UN)
 
 
 @pytest.fixture

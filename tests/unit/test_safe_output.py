@@ -81,18 +81,16 @@ def test_temp_output_removes_file_on_normal_exit(tmp_path: Path) -> None:
 
 def test_temp_output_removes_file_on_exception(tmp_path: Path) -> None:
     final = tmp_path / "out.mp4"
-    with pytest.raises(RuntimeError, match="simulated failure"):
-        with temp_output(final) as tmp:
-            tmp.write_bytes(b"in-progress conversion before crash")
-            assert tmp.exists()
-            raise RuntimeError("simulated failure")
+    with pytest.raises(RuntimeError, match="simulated failure"), temp_output(final) as tmp:
+        tmp.write_bytes(b"in-progress conversion before crash")
+        assert tmp.exists()
+        raise RuntimeError("simulated failure")
 
     # Guarantees no .cuttle-part remains after exception
     assert not tmp.exists()
 
 
 def test_commit_output_success(tmp_path: Path) -> None:
-    final_target = tmp_path / "test.mp3"
     tmp_file = tmp_path / ("test.mp3" + PART_SUFFIX)
     tmp_file.write_bytes(b"converted mp3 audio data")
 
@@ -104,7 +102,10 @@ def test_commit_output_success(tmp_path: Path) -> None:
 
 
 def test_commit_output_simulated_file_exists_race(tmp_path: Path) -> None:
-    """When a concurrent race condition creates the first chosen name, commit_output picks next free name."""
+    """When a concurrent race condition creates the first chosen name,
+
+    commit_output picks next free name.
+    """
     tmp_file = tmp_path / ("race.mp3" + PART_SUFFIX)
     tmp_file.write_bytes(b"data")
 
@@ -117,7 +118,9 @@ def test_commit_output_simulated_file_exists_race(tmp_path: Path) -> None:
         if attempt_count == 1:
             # Simulate collision on first attempt
             (tmp_path / "race (converted).mp3").touch()
-            raise FileExistsError("WinError 183: Cannot create a file when that file already exists")
+            raise FileExistsError(
+                "WinError 183: Cannot create a file when that file already exists"
+            )
         original_rename(src, dst)
 
     with patch("os.rename", side_effect=mock_rename):
@@ -132,10 +135,7 @@ def test_os_replace_is_never_called(tmp_path: Path) -> None:
     """Hard rule: os.replace must never be called in safe_output.py."""
     # 1. Grep test
     src_file = (
-        Path(__file__).resolve().parent.parent.parent
-        / "cuttle"
-        / "engine"
-        / "safe_output.py"
+        Path(__file__).resolve().parent.parent.parent / "cuttle" / "engine" / "safe_output.py"
     )
     content = src_file.read_text(encoding="utf-8")
     assert "os.replace" not in content

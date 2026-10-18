@@ -11,9 +11,9 @@ Per TRD §6.4:
 from __future__ import annotations
 
 import json
-from pathlib import Path
 import shutil
 import subprocess
+from pathlib import Path
 
 from cuttle.adapters.base import BaseAdapter
 from cuttle.engine.errors import CuttleError
@@ -118,7 +118,9 @@ class FFmpegAdapter(BaseAdapter):
 
         try:
             data = json.loads(res.stdout)
-        except json.JSONDecodeError as err:
+            if not isinstance(data, dict):
+                raise ValueError("Expected JSON object from ffprobe")
+        except (json.JSONDecodeError, ValueError) as err:
             raise CuttleError(
                 code="E_SRC_CORRUPT",
                 user_message=f"Could not parse media metadata: {src.name}",
@@ -144,10 +146,7 @@ class FFmpegAdapter(BaseAdapter):
             data = self.probe(src)
             streams = data.get("streams", [])
             if isinstance(streams, list):
-                return any(
-                    isinstance(s, dict) and s.get("codec_type") == "audio"
-                    for s in streams
-                )
+                return any(isinstance(s, dict) and s.get("codec_type") == "audio" for s in streams)
         except CuttleError:
             raise
         except Exception:
@@ -170,74 +169,94 @@ class FFmpegAdapter(BaseAdapter):
         tmp_str = str(tmp_out)
 
         if target == "mp3":
-            return (
-                base
-                + ["-i", src_str, "-vn", "-c:a", "libmp3lame", "-q:a", "2"]
-                + prog
-                + ["-f", "mp3", tmp_str]
-            )
+            return [
+                *base,
+                "-i",
+                src_str,
+                "-vn",
+                "-c:a",
+                "libmp3lame",
+                "-q:a",
+                "2",
+                *prog,
+                "-f",
+                "mp3",
+                tmp_str,
+            ]
 
         if target == "wav":
-            return (
-                base
-                + ["-i", src_str, "-vn", "-c:a", "pcm_s16le"]
-                + prog
-                + ["-f", "wav", tmp_str]
-            )
+            return [
+                *base,
+                "-i",
+                src_str,
+                "-vn",
+                "-c:a",
+                "pcm_s16le",
+                *prog,
+                "-f",
+                "wav",
+                tmp_str,
+            ]
 
         if target == "mp4":
-            return (
-                base
-                + [
-                    "-i",
-                    src_str,
-                    "-c:v",
-                    "libx264",
-                    "-preset",
-                    "medium",
-                    "-crf",
-                    "20",
-                    "-c:a",
-                    "aac",
-                    "-b:a",
-                    "192k",
-                    "-movflags",
-                    "+faststart",
-                ]
-                + prog
-                + ["-f", "mp4", tmp_str]
-            )
+            return [
+                *base,
+                "-i",
+                src_str,
+                "-c:v",
+                "libx264",
+                "-preset",
+                "medium",
+                "-crf",
+                "20",
+                "-c:a",
+                "aac",
+                "-b:a",
+                "192k",
+                "-movflags",
+                "+faststart",
+                *prog,
+                "-f",
+                "mp4",
+                tmp_str,
+            ]
 
         if target == "webm":
-            return (
-                base
-                + [
-                    "-i",
-                    src_str,
-                    "-c:v",
-                    "libvpx-vp9",
-                    "-crf",
-                    "32",
-                    "-b:v",
-                    "0",
-                    "-c:a",
-                    "libopus",
-                ]
-                + prog
-                + ["-f", "webm", tmp_str]
-            )
+            return [
+                *base,
+                "-i",
+                src_str,
+                "-c:v",
+                "libvpx-vp9",
+                "-crf",
+                "32",
+                "-b:v",
+                "0",
+                "-c:a",
+                "libopus",
+                *prog,
+                "-f",
+                "webm",
+                tmp_str,
+            ]
 
         if target == "gif":
             vf_filter = (
-                "fps=12,scale=480:-1:flags=lanczos,split[a][b];"
-                "[a]palettegen[p];[b][p]paletteuse"
+                "fps=12,scale=480:-1:flags=lanczos,split[a][b];[a]palettegen[p];[b][p]paletteuse"
             )
-            return (
-                base
-                + ["-i", src_str, "-vf", vf_filter, "-loop", "0"]
-                + prog
-                + ["-f", "gif", tmp_str]
-            )
+            return [
+                *base,
+                "-i",
+                src_str,
+                "-vf",
+                vf_filter,
+                "-loop",
+                "0",
+                *prog,
+                "-f",
+                "gif",
+                tmp_str,
+            ]
 
         raise CuttleError(
             code="E_UNSUPPORTED",
@@ -256,13 +275,12 @@ class FFmpegAdapter(BaseAdapter):
         target = dst_fmt.lower()
 
         # Check silent video audio extraction constraint
-        if target in {"mp3", "wav"}:
-            if not self.has_audio_stream(src):
-                raise CuttleError(
-                    code="E_UNSUPPORTED",
-                    user_message="This video has no audio to extract.",
-                    detail=f"Probed streams in {src.name} contained no audio codec.",
-                )
+        if target in {"mp3", "wav"} and not self.has_audio_stream(src):
+            raise CuttleError(
+                code="E_UNSUPPORTED",
+                user_message="This video has no audio to extract.",
+                detail=f"Probed streams in {src.name} contained no audio codec.",
+            )
 
         duration = self.get_duration(src)
         argv = self.build_argv(src, target, tmp_out, options)
@@ -288,13 +306,13 @@ class FFmpegAdapter(BaseAdapter):
                         calc_pct = (out_us / 1_000_000.0) / duration_s * 100.0
                         pct = max(last_percent, min(100.0, calc_pct))
                         last_percent = pct
-                        on_progress(round(pct, 1))
+                        on_progress(round(pct, 1), f"{round(pct, 1)}%")
                     else:
-                        on_progress(None)
+                        on_progress(None, "converting")
                 except (ValueError, IndexError):
                     pass
             elif line.startswith("progress=end"):
-                on_progress(100.0)
+                on_progress(100.0, "complete")
 
         run_command(
             plan.args,

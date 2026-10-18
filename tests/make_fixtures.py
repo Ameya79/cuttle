@@ -11,14 +11,13 @@ Per TRD §6.10:
 from __future__ import annotations
 
 import argparse
-import os
-from pathlib import Path
 import shutil
 import subprocess
 import sys
+from pathlib import Path
 
-from PIL import Image
 import pillow_heif
+from PIL import Image
 
 pillow_heif.register_heif_opener()
 
@@ -88,10 +87,7 @@ def generate_images(out_dir: Path) -> dict[str, Path]:
         im_rgb.save(heic_path, format="HEIF")
     except Exception:
         # Fallback if HEIF encoder has missing plugins
-        heic_path.write_bytes(
-            b"\x00\x00\x00\x18ftypheic\x00\x00\x00\x00mif1heic"
-            + b"\x00" * 200
-        )
+        heic_path.write_bytes(b"\x00\x00\x00\x18ftypheic\x00\x00\x00\x00mif1heic" + b"\x00" * 200)
     created["heic"] = heic_path
 
     return created

@@ -9,11 +9,11 @@ Implements TRD §6.5 steps 3, 4, 5, 8:
 
 from __future__ import annotations
 
-from collections.abc import Generator
-from contextlib import contextmanager
 import os
-from pathlib import Path
 import shutil
+from collections.abc import Generator
+from contextlib import contextmanager, suppress
+from pathlib import Path
 
 from cuttle.engine.errors import CuttleError
 
@@ -50,7 +50,7 @@ def check_free_space(out_dir: Path, required_bytes: int) -> None:
     try:
         usage = shutil.disk_usage(out_dir)
         free = usage.free
-    except OSError as err:
+    except OSError:
         # If disk usage cannot be determined, proceed cautiously
         return
 
@@ -78,10 +78,8 @@ def temp_output(final_path: Path) -> Generator[Path, None, None]:
         yield tmp_path
     finally:
         if tmp_path.exists():
-            try:
+            with suppress(OSError):
                 tmp_path.unlink()
-            except OSError:
-                pass
 
 
 def commit_output(

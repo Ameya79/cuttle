@@ -11,15 +11,13 @@ Per TRD task card P1-09:
 from __future__ import annotations
 
 from pathlib import Path
-from unittest.mock import MagicMock
 
 import pytest
 
 from cuttle.adapters.ffmpeg import FFmpegAdapter, find_tool
 from cuttle.engine.errors import CuttleError
 from cuttle.engine.safe_output import temp_output
-from cuttle.engine.types import CancelToken, Plan, Quality
-
+from cuttle.engine.types import CancelToken
 
 # --- Unit Tests: Argv Builder (No FFmpeg binary required) ---
 
@@ -36,10 +34,13 @@ class TestArgvBuilder:
 
         assert argv[0] == "ffmpeg_mock"
         assert "-vn" in argv
-        assert ["-c:a", "libmp3lame"] == [argv[argv.index("-c:a")], argv[argv.index("-c:a") + 1]]
-        assert ["-q:a", "2"] == [argv[argv.index("-q:a")], argv[argv.index("-q:a") + 1]]
-        assert ["-progress", "pipe:1"] == [argv[argv.index("-progress")], argv[argv.index("-progress") + 1]]
-        assert ["-f", "mp3"] == [argv[argv.index("-f")], argv[argv.index("-f") + 1]]
+        assert [argv[argv.index("-c:a")], argv[argv.index("-c:a") + 1]] == ["-c:a", "libmp3lame"]
+        assert [argv[argv.index("-q:a")], argv[argv.index("-q:a") + 1]] == ["-q:a", "2"]
+        assert [argv[argv.index("-progress")], argv[argv.index("-progress") + 1]] == [
+            "-progress",
+            "pipe:1",
+        ]
+        assert [argv[argv.index("-f")], argv[argv.index("-f") + 1]] == ["-f", "mp3"]
         assert argv[-1] == str(tmp)
 
     def test_wav_recipe(self, adapter: FFmpegAdapter) -> None:
@@ -49,8 +50,8 @@ class TestArgvBuilder:
 
         assert argv[0] == "ffmpeg_mock"
         assert "-vn" in argv
-        assert ["-c:a", "pcm_s16le"] == [argv[argv.index("-c:a")], argv[argv.index("-c:a") + 1]]
-        assert ["-f", "wav"] == [argv[argv.index("-f")], argv[argv.index("-f") + 1]]
+        assert [argv[argv.index("-c:a")], argv[argv.index("-c:a") + 1]] == ["-c:a", "pcm_s16le"]
+        assert [argv[argv.index("-f")], argv[argv.index("-f") + 1]] == ["-f", "wav"]
         assert argv[-1] == str(tmp)
 
     def test_mp4_recipe(self, adapter: FFmpegAdapter) -> None:
@@ -59,13 +60,19 @@ class TestArgvBuilder:
         argv = adapter.build_argv(src, "mp4", tmp)
 
         assert argv[0] == "ffmpeg_mock"
-        assert ["-c:v", "libx264"] == [argv[argv.index("-c:v")], argv[argv.index("-c:v") + 1]]
-        assert ["-preset", "medium"] == [argv[argv.index("-preset")], argv[argv.index("-preset") + 1]]
-        assert ["-crf", "20"] == [argv[argv.index("-crf")], argv[argv.index("-crf") + 1]]
-        assert ["-c:a", "aac"] == [argv[argv.index("-c:a")], argv[argv.index("-c:a") + 1]]
-        assert ["-b:a", "192k"] == [argv[argv.index("-b:a")], argv[argv.index("-b:a") + 1]]
-        assert ["-movflags", "+faststart"] == [argv[argv.index("-movflags")], argv[argv.index("-movflags") + 1]]
-        assert ["-f", "mp4"] == [argv[argv.index("-f")], argv[argv.index("-f") + 1]]
+        assert [argv[argv.index("-c:v")], argv[argv.index("-c:v") + 1]] == ["-c:v", "libx264"]
+        assert [argv[argv.index("-preset")], argv[argv.index("-preset") + 1]] == [
+            "-preset",
+            "medium",
+        ]
+        assert [argv[argv.index("-crf")], argv[argv.index("-crf") + 1]] == ["-crf", "20"]
+        assert [argv[argv.index("-c:a")], argv[argv.index("-c:a") + 1]] == ["-c:a", "aac"]
+        assert [argv[argv.index("-b:a")], argv[argv.index("-b:a") + 1]] == ["-b:a", "192k"]
+        assert [argv[argv.index("-movflags")], argv[argv.index("-movflags") + 1]] == [
+            "-movflags",
+            "+faststart",
+        ]
+        assert [argv[argv.index("-f")], argv[argv.index("-f") + 1]] == ["-f", "mp4"]
 
     def test_webm_recipe(self, adapter: FFmpegAdapter) -> None:
         src = Path("/tmp/video.mp4")
@@ -73,11 +80,11 @@ class TestArgvBuilder:
         argv = adapter.build_argv(src, "webm", tmp)
 
         assert argv[0] == "ffmpeg_mock"
-        assert ["-c:v", "libvpx-vp9"] == [argv[argv.index("-c:v")], argv[argv.index("-c:v") + 1]]
-        assert ["-crf", "32"] == [argv[argv.index("-crf")], argv[argv.index("-crf") + 1]]
-        assert ["-b:v", "0"] == [argv[argv.index("-b:v")], argv[argv.index("-b:v") + 1]]
-        assert ["-c:a", "libopus"] == [argv[argv.index("-c:a")], argv[argv.index("-c:a") + 1]]
-        assert ["-f", "webm"] == [argv[argv.index("-f")], argv[argv.index("-f") + 1]]
+        assert [argv[argv.index("-c:v")], argv[argv.index("-c:v") + 1]] == ["-c:v", "libvpx-vp9"]
+        assert [argv[argv.index("-crf")], argv[argv.index("-crf") + 1]] == ["-crf", "32"]
+        assert [argv[argv.index("-b:v")], argv[argv.index("-b:v") + 1]] == ["-b:v", "0"]
+        assert [argv[argv.index("-c:a")], argv[argv.index("-c:a") + 1]] == ["-c:a", "libopus"]
+        assert [argv[argv.index("-f")], argv[argv.index("-f") + 1]] == ["-f", "webm"]
 
     def test_gif_recipe(self, adapter: FFmpegAdapter) -> None:
         src = Path("/tmp/video.mp4")
@@ -87,8 +94,8 @@ class TestArgvBuilder:
         assert argv[0] == "ffmpeg_mock"
         assert "-vf" in argv
         assert "palettegen" in argv[argv.index("-vf") + 1]
-        assert ["-loop", "0"] == [argv[argv.index("-loop")], argv[argv.index("-loop") + 1]]
-        assert ["-f", "gif"] == [argv[argv.index("-f")], argv[argv.index("-f") + 1]]
+        assert [argv[argv.index("-loop")], argv[argv.index("-loop") + 1]] == ["-loop", "0"]
+        assert [argv[argv.index("-f")], argv[argv.index("-f") + 1]] == ["-f", "gif"]
 
     def test_unsupported_recipe_raises(self, adapter: FFmpegAdapter) -> None:
         with pytest.raises(CuttleError) as exc_info:
@@ -139,7 +146,7 @@ class TestFFmpegIntegration:
 
         progress_log: list[float] = []
 
-        def on_prog(pct: float | None) -> None:
+        def on_prog(pct: float | None, msg: str = "") -> None:
             if pct is not None:
                 progress_log.append(pct)
 
@@ -174,7 +181,7 @@ class TestFFmpegIntegration:
         with temp_output(final_target) as tmp_out:
             try:
                 plan = adapter.plan(src, "mp3", tmp_out, {})
-                adapter.run(plan, lambda _: None, CancelToken())
+                adapter.run(plan, lambda pct, msg="": None, CancelToken())
             except CuttleError as err:
                 assert err.code in {"E_SRC_CORRUPT", "E_TOOL_FAILED"}
 

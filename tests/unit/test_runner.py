@@ -10,17 +10,16 @@ Per TRD task card P1-08:
 
 from __future__ import annotations
 
-from pathlib import Path
-import subprocess
 import sys
 import threading
 import time
+from pathlib import Path
 
 import psutil
 import pytest
 
 from cuttle.engine.errors import CuttleError
-from cuttle.engine.runner import kill_process_tree, run_command
+from cuttle.engine.runner import run_command
 from cuttle.engine.types import CancelToken
 
 
@@ -72,9 +71,7 @@ def test_runner_cancel_kills_child_and_grandchild(tmp_path: Path) -> None:
 
     # Child spawns a grandchild that sleeps, and child also sleeps
     grandchild_code = (
-        f"import os, time; "
-        f"open(r'{pid_file}', 'w').write(str(os.getpid())); "
-        f"time.sleep(30)"
+        f"import os, time; open(r'{pid_file}', 'w').write(str(os.getpid())); time.sleep(30)"
     )
     parent_code = (
         f"import subprocess, sys, time; "
@@ -126,10 +123,7 @@ def test_runner_tool_failure_raises_e_tool_failed() -> None:
 def test_runner_never_uses_shell_true() -> None:
     """Hard rule: runner.py must never use shell=True."""
     runner_src = (
-        Path(__file__).resolve().parent.parent.parent
-        / "cuttle"
-        / "engine"
-        / "runner.py"
+        Path(__file__).resolve().parent.parent.parent / "cuttle" / "engine" / "runner.py"
     ).read_text(encoding="utf-8")
     assert "shell=True" not in runner_src
     assert "shell=False" in runner_src
