@@ -155,7 +155,47 @@ def cmd_cancel(args: argparse.Namespace) -> int:
         return 1
 
 
+def cmd_install_shell(args: argparse.Namespace) -> int:
+    """Handle 'cuttlectl install-shell' command."""
+    from cuttle.shell.registry_installer import RegistryConfig, install_context_menus
+
+    cfg = RegistryConfig(
+        base_path=args.base_path or r"Software\Classes",
+        manifest_path=args.manifest,
+    )
+    keys = install_context_menus(cfg)
+    print(f"Registered {len(keys)} context menu keys.")
+    return 0
+
+
+def cmd_uninstall_shell(args: argparse.Namespace) -> int:
+    """Handle 'cuttlectl uninstall-shell' command."""
+    from cuttle.shell.registry_installer import RegistryConfig, uninstall_context_menus
+
+    cfg = RegistryConfig(
+        base_path=args.base_path or r"Software\Classes",
+        manifest_path=args.manifest,
+    )
+    count = uninstall_context_menus(cfg)
+    print(f"Uninstalled {count} context menu keys.")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
+    raw_args = list(sys.argv[1:] if argv is None else argv)
+
+    # Shorthand support: cuttlectl <file1> [<file2> ...] <target_fmt>
+    known_cmds = {"submit", "ping", "cancel", "install-shell", "uninstall-shell", "-h", "--help"}
+    if (
+        raw_args
+        and raw_args[0] not in known_cmds
+        and not raw_args[0].startswith("-")
+        and len(raw_args) >= 2
+    ):
+        target_fmt = raw_args[-1]
+        files = raw_args[:-1]
+        raw_args = ["submit", "--to", target_fmt, *files]
+
     parser = argparse.ArgumentParser(
         prog="cuttlectl",
         description="Fast launcher and controller for Cuttle file conversions",
@@ -180,7 +220,19 @@ def main(argv: list[str] | None = None) -> int:
     p_cancel.add_argument("--batch", default=None, help="Specific batch ID to cancel")
     p_cancel.set_defaults(func=cmd_cancel)
 
-    args = parser.parse_args(argv)
+    # install-shell subcommand
+    p_install = subparsers.add_parser("install-shell", help="Register Explorer context menus")
+    p_install.add_argument("--base-path", default=None, help="Custom registry base path")
+    p_install.add_argument("--manifest", default=None, help="Custom manifest file path")
+    p_install.set_defaults(func=cmd_install_shell)
+
+    # uninstall-shell subcommand
+    p_uninstall = subparsers.add_parser("uninstall-shell", help="Remove Explorer context menus")
+    p_uninstall.add_argument("--base-path", default=None, help="Custom registry base path")
+    p_uninstall.add_argument("--manifest", default=None, help="Custom manifest file path")
+    p_uninstall.set_defaults(func=cmd_uninstall_shell)
+
+    args = parser.parse_args(raw_args)
     return int(args.func(args))
 
 
