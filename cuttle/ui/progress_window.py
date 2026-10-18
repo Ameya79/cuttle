@@ -17,7 +17,7 @@ from collections.abc import Callable
 from pathlib import Path
 
 from PySide6.QtCore import QPoint, Qt, QTimer, Signal
-from PySide6.QtGui import QColor, QFont, QGuiApplication
+from PySide6.QtGui import QColor, QFont, QGuiApplication, QPixmap
 from PySide6.QtWidgets import (
     QApplication,
     QFrame,
@@ -236,9 +236,23 @@ class FloatingProgressWindow(QWidget):
         card_layout.setContentsMargins(12, 12, 12, 12)
         card_layout.setSpacing(8)
 
-        # Header: App Title, Item Count, and Cancel All Button
+        # Header: App Logo, Title, Item Count, and Cancel All Button
         header_layout = QHBoxLayout()
         header_layout.setContentsMargins(0, 0, 0, 0)
+        header_layout.setSpacing(6)
+
+        logo_path = Path(__file__).resolve().parent.parent.parent / "assets" / "logo.png"
+        if logo_path.is_file():
+            lbl_icon = QLabel()
+            pix = QPixmap(str(logo_path)).scaled(
+                20,
+                20,
+                Qt.AspectRatioMode.KeepAspectRatio,
+                Qt.TransformationMode.SmoothTransformation,
+            )
+            lbl_icon.setPixmap(pix)
+            lbl_icon.setFixedSize(20, 20)
+            header_layout.addWidget(lbl_icon)
 
         self.lbl_header = QLabel("Cuttle Converting")
         font = QFont("Segoe UI", 10, QFont.Weight.Bold)

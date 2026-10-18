@@ -45,8 +45,19 @@ class CuttleTrayIcon(QSystemTrayIcon):
         super().__init__()
 
         # Setup icon
+        resolved_icon = None
         if icon_path and Path(icon_path).is_file():
-            self.setIcon(QIcon(str(icon_path)))
+            resolved_icon = Path(icon_path)
+        else:
+            default_assets = Path(__file__).resolve().parent.parent.parent / "assets"
+            for candidate in ("cuttle.ico", "logo.png"):
+                c_path = default_assets / candidate
+                if c_path.is_file():
+                    resolved_icon = c_path
+                    break
+
+        if resolved_icon:
+            self.setIcon(QIcon(str(resolved_icon)))
         else:
             self.setIcon(create_fallback_icon())
 

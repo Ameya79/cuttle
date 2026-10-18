@@ -39,6 +39,11 @@ class RegistryConfig:
 
             self.root_key = winreg.HKEY_CURRENT_USER
 
+        if self.icon_path is None:
+            default_ico = Path(__file__).resolve().parent.parent.parent / "assets" / "cuttle.ico"
+            if default_ico.is_file():
+                self.icon_path = default_ico
+
 
 def get_default_cuttlectl_cmd() -> str:
     """Resolve default command string to execute cuttlectl."""

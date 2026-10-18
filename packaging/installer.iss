@@ -25,6 +25,8 @@ OutputBaseFilename=CuttleSetup
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
+SetupIconFile=..\assets\cuttle.ico
+UninstallIconFile=..\assets\cuttle.ico
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"

@@ -14,10 +14,12 @@ block_cipher = None
 
 ROOT_DIR = Path(SPECPATH).resolve().parent
 
-# Data files: formats.toml, edges.toml
+# Data files: formats.toml, edges.toml, and assets
 datas = [
     (str(ROOT_DIR / "cuttle" / "registry" / "*.toml"), "cuttle/registry"),
+    (str(ROOT_DIR / "assets" / "*.*"), "assets"),
 ]
+icon_path = str(ROOT_DIR / "assets" / "cuttle.ico")
 
 # Binaries: vendor tools if present
 binaries = []
@@ -59,6 +61,7 @@ exe_cli = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
+    icon=icon_path,
 )
 
 # 2. cuttlectl fast launcher executable
@@ -94,6 +97,7 @@ exe_ctl = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
+    icon=icon_path,
 )
 
 # 3. cuttle-worker daemon executable
@@ -129,6 +133,7 @@ exe_worker = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
+    icon=icon_path,
 )
 
 # COLLECT all three executables and shared dependencies into dist/Cuttle/
