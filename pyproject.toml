@@ -69,6 +69,7 @@ module = [
     "win32con",
     "win32pipe",
     "win32file",
+    "win32clipboard",
     "pywintypes",
     "winerror",
     "windows_toasts",
