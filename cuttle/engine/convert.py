@@ -20,6 +20,8 @@ from pathlib import Path
 from cuttle.adapters.base import BaseAdapter
 from cuttle.adapters.ffmpeg import FFmpegAdapter
 from cuttle.adapters.image import ImageAdapter
+from cuttle.adapters.libreoffice import LibreOfficeAdapter
+from cuttle.adapters.pandoc import PandocAdapter
 from cuttle.engine.detect import detect_format
 from cuttle.engine.errors import CuttleError
 from cuttle.engine.graph import ConversionGraph
@@ -35,7 +37,12 @@ from cuttle.engine.types import (
 
 
 def is_tool_available(tool_name: str) -> bool:
-    """Check whether a CLI tool binary exists in vendor/ or system PATH."""
+    """Check whether a CLI tool binary exists in vendor/, system PATH, or registry."""
+    if tool_name == "libreoffice":
+        from cuttle.platform.windows.office_detect import detect_office
+
+        return detect_office().installed
+
     project_root = Path(__file__).resolve().parent.parent.parent
     vendor_tool = project_root / "vendor" / f"{tool_name}.exe"
     if vendor_tool.is_file():
@@ -83,6 +90,10 @@ def get_adapter(adapter_name: str) -> BaseAdapter:
         return FFmpegAdapter()
     if adapter_name == "image":
         return ImageAdapter()
+    if adapter_name == "pandoc":
+        return PandocAdapter()
+    if adapter_name == "libreoffice":
+        return LibreOfficeAdapter()
 
     raise CuttleError(
         code="E_TOOL_MISSING",

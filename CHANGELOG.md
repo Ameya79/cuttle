@@ -5,6 +5,19 @@ All notable changes to Cuttle will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.3.0] - Phase 3: Documents & PDFs
+
+### Added
+- **Pandoc Adapter (P3-01)**: `cuttle/adapters/pandoc.py` converting text documents (`md`, `html`, `docx`, `txt`) with explicit `-f`/`-t` arguments, `--sandbox` flag detection, standalone HTML documents (`-s`), and DOCX component validation.
+- **Office Detection (P3-02)**: `cuttle/platform/windows/office_detect.py` searching Windows App Paths registry (`soffice.exe`), `PATH`, and standard `ProgramFiles` directories.
+- **LibreOffice Adapter (P3-03)**: `cuttle/adapters/libreoffice.py` converting Office documents (`docx`, `pptx`, `xlsx`, `odt`) to `pdf` via headless `soffice.exe`, using private isolated profile directories, single-concurrency lock (`_LIBREOFFICE_LOCK`), 120s timeout, and PDF validation.
+- **Office Document & PDF Validators (P3-04)**: `cuttle/engine/validators.py` and `cuttle/adapters/pdf.py` verifying valid OpenXML zip structures, component parts, and pypdf page rendering.
+- **Font Substitution Warning & Locked PDFs (P3-05)**: `cuttle/adapters/pdf.py` comparing DOCX `fontTable.xml` with PDF `/Resources/Font` to issue `"Some fonts were replaced, layout may shift"`, detecting encrypted PDFs and enforcing passwords (`E_SRC_PASSWORD`).
+- **Folder Conversion Engine & CLI (P3-06)**: `cuttle/engine/folder.py` supporting directory conversions with recursive scanning, extension filtering, `(converted)` skipping, and symlink/junction escape guards (`--recursive`, `--filter`).
+- **Missing LibreOffice Guidance UI (P3-07)**: `cuttle/ui/missing_tool_dialog.py` displaying clear requirement dialog with official download link and "Re-check" button to automatically refresh context menus upon install.
+- **Explorer Menu Missing Tool Routing & Terminal Auto-Close Fix (P3-08)**: `cuttle/shell/registry_installer.py` labeling missing tools as `"Convert to PDF (needs LibreOffice)"` launching guidance dialog, and launching right-click commands via `pythonw.exe` / `cuttlectl.exe` with `CREATE_NO_WINDOW | DETACHED_PROCESS` and stdio redirection to `DEVNULL` to prevent persistent console windows.
+- **Document Integration Verification (P3-09)**: `tests/integration/test_document_pipeline.py` and full test suite passing (300 tests) with 0 `.cuttle-part` file leaks, clean ruff linter/formatter, and strict mypy compliance.
+
 ## [0.2.0] - Phase 2: Windows Desktop Integration & Background Worker
 
 ### Added
