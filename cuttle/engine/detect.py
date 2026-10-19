@@ -41,6 +41,16 @@ CANONICAL_FORMAT_MAP: dict[str, str] = {
     "mp3": "mp3",
     "wav": "wav",
     "wave": "wav",
+    "pdf": "pdf",
+    "docx": "docx",
+    "pptx": "pptx",
+    "xlsx": "xlsx",
+    "odt": "odt",
+    "md": "md",
+    "markdown": "md",
+    "html": "html",
+    "htm": "html",
+    "txt": "txt",
 }
 
 
@@ -119,11 +129,20 @@ def _sniff_raw_magic(header: bytes) -> str | None:
             return "heic"
         return "mp4"
 
+    # PDF
+    if header.startswith(b"%PDF-"):
+        return "pdf"
+
+    # HTML
+    stripped = header.lstrip()
+    if stripped.lower().startswith((b"<!doctype html", b"<html")):
+        return "html"
+
     return None
 
 
 def _detect_magic(src: Path) -> str | None:
-    """Probe magic bytes from file header using filetype, raw sniffing, and Pillow."""
+    """Probe magic bytes from file header using filetype, raw sniffing, zip, and Pillow."""
     try:
         with open(src, "rb") as f:
             header = f.read(8192)
@@ -145,7 +164,27 @@ def _detect_magic(src: Path) -> str | None:
     if raw_fmt:
         return raw_fmt
 
-    # 3. Pillow fallback for image formats
+    # 3. Zip container sniffing for Office / OpenDocument formats
+    if header.startswith(b"PK\x03\x04"):
+        try:
+            import zipfile
+
+            with zipfile.ZipFile(src, "r") as z:
+                names = z.namelist()
+                if any(n.startswith("word/") for n in names):
+                    return "docx"
+                if any(n.startswith("ppt/") for n in names):
+                    return "pptx"
+                if any(n.startswith("xl/") for n in names):
+                    return "xlsx"
+                if "mimetype" in names:
+                    m = z.read("mimetype").decode("utf-8", errors="ignore")
+                    if "opendocument.text" in m:
+                        return "odt"
+        except Exception:
+            pass
+
+    # 4. Pillow fallback for image formats
     try:
         with Image.open(src) as img:
             img_format = img.format
