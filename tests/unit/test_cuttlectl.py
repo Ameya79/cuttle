@@ -178,3 +178,12 @@ def test_cuttlectl_auto_start_worker() -> None:
         call_pipe(auto_pipe, b'{"op": "shutdown"}', timeout_ms=1000)
     finally:
         time.sleep(0.2)
+
+
+def test_cuttlectl_missing_tool() -> None:
+    from unittest.mock import patch
+
+    with patch("cuttle.ui.missing_tool_dialog.show_missing_tool_dialog") as mock_show:
+        exit_code = cuttlectl_main(["missing-tool", "libreoffice"])
+        assert exit_code == 0
+        mock_show.assert_called_once_with(tool_name="libreoffice")

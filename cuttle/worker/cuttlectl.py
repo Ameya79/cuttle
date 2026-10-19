@@ -53,7 +53,6 @@ def ensure_worker_running(
         candidate_pythonw = Path(sys.executable).with_name("pythonw.exe")
         if candidate_pythonw.is_file():
             py_exec = str(candidate_pythonw)
-            creationflags = getattr(subprocess, "DETACHED_PROCESS", 0)
 
     cmd = [py_exec, "-m", "cuttle.worker.main"]
     if pipe_name:
@@ -67,6 +66,9 @@ def ensure_worker_running(
         cwd=str(project_root),
         env=env,
         creationflags=creationflags,
+        stdin=subprocess.DEVNULL,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
         close_fds=True,
     )
 
@@ -195,11 +197,28 @@ def cmd_uninstall_shell(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_missing_tool(args: argparse.Namespace) -> int:
+    """Handle 'cuttlectl missing-tool' command."""
+    from cuttle.ui.missing_tool_dialog import show_missing_tool_dialog
+
+    show_missing_tool_dialog(tool_name=args.tool)
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     raw_args = list(sys.argv[1:] if argv is None else argv)
 
     # Shorthand support: cuttlectl <file1> [<file2> ...] <target_fmt>
-    known_cmds = {"submit", "ping", "cancel", "install-shell", "uninstall-shell", "-h", "--help"}
+    known_cmds = {
+        "submit",
+        "ping",
+        "cancel",
+        "install-shell",
+        "uninstall-shell",
+        "missing-tool",
+        "-h",
+        "--help",
+    }
     if (
         raw_args
         and raw_args[0] not in known_cmds
@@ -245,6 +264,11 @@ def main(argv: list[str] | None = None) -> int:
     p_uninstall.add_argument("--base-path", default=None, help="Custom registry base path")
     p_uninstall.add_argument("--manifest", default=None, help="Custom manifest file path")
     p_uninstall.set_defaults(func=cmd_uninstall_shell)
+
+    # missing-tool subcommand
+    p_missing = subparsers.add_parser("missing-tool", help="Display missing tool guidance dialog")
+    p_missing.add_argument("tool", default="libreoffice", nargs="?", help="Tool name")
+    p_missing.set_defaults(func=cmd_missing_tool)
 
     args = parser.parse_args(raw_args)
     return int(args.func(args))
