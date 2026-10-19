@@ -43,6 +43,11 @@ def is_tool_available(tool_name: str) -> bool:
 
         return detect_office().installed
 
+    if tool_name == "dwg_addon":
+        from cuttle.adapters.dwg import get_available_dwg_tool
+
+        return get_available_dwg_tool() is not None
+
     project_root = Path(__file__).resolve().parent.parent.parent
     vendor_tool = project_root / "vendor" / f"{tool_name}.exe"
     if vendor_tool.is_file():
@@ -52,7 +57,7 @@ def is_tool_available(tool_name: str) -> bool:
 
 def get_available_tools() -> set[str]:
     """Return set of external tool names currently available."""
-    known = ["ffmpeg", "ffprobe", "pandoc", "libreoffice"]
+    known = ["ffmpeg", "ffprobe", "pandoc", "libreoffice", "dwg_addon"]
     return {t for t in known if is_tool_available(t)}
 
 
@@ -106,6 +111,10 @@ def get_adapter(adapter_name: str) -> BaseAdapter:
         from cuttle.adapters.image_pdf import ImagePdfAdapter
 
         return ImagePdfAdapter()
+    if adapter_name == "dwg":
+        from cuttle.adapters.dwg import DwgAdapter
+
+        return DwgAdapter()
 
     raise CuttleError(
         code="E_TOOL_MISSING",

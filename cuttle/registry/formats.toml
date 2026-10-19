@@ -114,3 +114,15 @@ magic = "zip_xlsx"
 kind = "document"
 ext = ["odt"]
 magic = "zip_odt"
+
+# CAD / Engineering Drawings (Phase 5)
+[formats.dwg]
+kind = "document"
+ext = ["dwg"]
+magic = "cad_dwg"
+
+[formats.dxf]
+kind = "document"
+ext = ["dxf"]
+magic = "cad_dxf"
+

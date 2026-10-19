@@ -51,6 +51,8 @@ CANONICAL_FORMAT_MAP: dict[str, str] = {
     "html": "html",
     "htm": "html",
     "txt": "txt",
+    "dwg": "dwg",
+    "dxf": "dxf",
 }
 
 
@@ -137,6 +139,14 @@ def _sniff_raw_magic(header: bytes) -> str | None:
     stripped = header.lstrip()
     if stripped.lower().startswith((b"<!doctype html", b"<html")):
         return "html"
+
+    # AutoCAD DWG
+    if header.startswith(b"AC10"):
+        return "dwg"
+
+    # AutoCAD DXF
+    if stripped.startswith((b"0\r\nSECTION", b"0\nSECTION", b"AutoCAD Binary DXF")):
+        return "dxf"
 
     return None
 

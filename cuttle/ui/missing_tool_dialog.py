@@ -79,19 +79,31 @@ class MissingToolDialog(QDialog):
         layout.setContentsMargins(24, 24, 24, 24)
         layout.setSpacing(16)
 
-        # Header Title
-        title_label = QLabel("LibreOffice Required for PDF Conversion")
+        # Header Title and body text configured per tool
+        if self.tool_name in ("dwg", "dwg_addon"):
+            title_text = "DWG Add-On Required for CAD Conversion"
+            body_text = (
+                "Converting AutoCAD DWG drawings to PDF or DXF requires an add-on "
+                "(LibreDWG or ODA File Converter).\n\n"
+                "Install LibreDWG or ODA File Converter to convert drawings offline "
+                "with zero cloud uploads."
+            )
+            download_btn_text = "View DWG Add-On Guide"
+        else:
+            title_text = "LibreOffice Required for PDF Conversion"
+            body_text = (
+                "Converting Microsoft Office (DOCX, PPTX, XLSX) and OpenDocument files "
+                "to PDF requires LibreOffice.\n\n"
+                "LibreOffice is free and open-source. Once installed, Cuttle converts "
+                "all your documents 100% offline without uploading them to any cloud server."
+            )
+            download_btn_text = "Download LibreOffice"
+
+        title_label = QLabel(title_text)
         title_font = QFont("Segoe UI", 13, QFont.Weight.Bold)
         title_label.setFont(title_font)
         layout.addWidget(title_label)
 
-        # Body explanation
-        body_text = (
-            "Converting Microsoft Office (DOCX, PPTX, XLSX) and OpenDocument files "
-            "to PDF requires LibreOffice.\n\n"
-            "LibreOffice is free and open-source. Once installed, Cuttle converts "
-            "all your documents 100% offline without uploading them to any cloud server."
-        )
         self.body_label = QLabel(body_text)
         self.body_label.setWordWrap(True)
         self.body_label.setStyleSheet(f"color: {TEXT_MUTED}; line-height: 1.4;")
@@ -108,7 +120,7 @@ class MissingToolDialog(QDialog):
         btn_layout = QHBoxLayout()
         btn_layout.setSpacing(10)
 
-        self.btn_download = QPushButton("Download LibreOffice")
+        self.btn_download = QPushButton(download_btn_text)
         self.btn_download.setObjectName("primaryBtn")
         self.btn_download.clicked.connect(self._on_download)
         btn_layout.addWidget(self.btn_download)
@@ -124,18 +136,29 @@ class MissingToolDialog(QDialog):
         layout.addLayout(btn_layout)
 
     def _on_download(self) -> None:
-        """Open the official LibreOffice download portal in default web browser."""
-        webbrowser.open(LIBREOFFICE_DOWNLOAD_URL)
+        """Open download portal or documentation guide in default web browser."""
+        if self.tool_name in ("dwg", "dwg_addon"):
+            webbrowser.open("https://github.com/Ameya79/cuttle/blob/main/docs/dwg-addon.md")
+        else:
+            webbrowser.open(LIBREOFFICE_DOWNLOAD_URL)
 
     def _on_recheck(self) -> None:
-        """Inspect system again for LibreOffice."""
-        info = detect_office()
-        if info.installed:
+        """Inspect system again for required tool."""
+        if self.tool_name in ("dwg", "dwg_addon"):
+            from cuttle.adapters.dwg import get_available_dwg_tool
+
+            detected = get_available_dwg_tool() is not None
+            tool_display = "DWG Add-on"
+        else:
+            detected = detect_office().installed
+            tool_display = "LibreOffice"
+
+        if detected:
             self.status_label.setStyleSheet(f"color: {ACCENT_GREEN}; font-weight: bold;")
             self.status_label.setText(
-                "LibreOffice detected successfully! Updating right-click menus..."
+                f"{tool_display} detected successfully! Updating right-click menus..."
             )
-            # Refresh context menus so verbs remove '(needs LibreOffice)'
+            # Refresh context menus
             try:
                 from cuttle.shell.registry_installer import install_context_menus
 
@@ -148,7 +171,7 @@ class MissingToolDialog(QDialog):
         else:
             self.status_label.setStyleSheet(f"color: {ACCENT_RED};")
             self.status_label.setText(
-                "LibreOffice not detected yet. Please complete the installation and retry."
+                f"{tool_display} not detected yet. Please complete the installation and retry."
             )
 
 

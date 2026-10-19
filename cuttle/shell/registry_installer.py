@@ -153,6 +153,9 @@ def install_context_menus(config: RegistryConfig | None = None) -> list[str]:
             elif target.missing == "libreoffice":
                 verb_label = f"Convert to {target.label} (needs LibreOffice)"
                 cmd_str = f"{cuttlectl} missing-tool libreoffice"
+            elif target.missing in ("dwg", "dwg_addon"):
+                verb_label = f"Convert to {target.label} (needs DWG add-on)"
+                cmd_str = f"{cuttlectl} missing-tool dwg_addon"
             else:
                 verb_label = f"Convert to {target.label} (needs {target.missing})"
                 cmd_str = f"{cuttlectl} missing-tool {target.missing}"

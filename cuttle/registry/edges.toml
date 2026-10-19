@@ -655,4 +655,33 @@ quality = "lossless"
 cost = 2
 label = "PDF document"
 
+# --- CAD / DWG Drawings (Phase 5) ---
+[[edge]]
+src = "dwg"
+dst = "pdf"
+adapter = "dwg"
+quality = "best_effort"
+cost = 8
+label = "PDF drawing"
+requires = ["dwg_addon"]
+
+[[edge]]
+src = "dwg"
+dst = "dxf"
+adapter = "dwg"
+quality = "best_effort"
+cost = 5
+label = "DXF drawing"
+requires = ["dwg_addon"]
+
+[[edge]]
+src = "dxf"
+dst = "pdf"
+adapter = "dwg"
+quality = "best_effort"
+cost = 5
+label = "PDF drawing"
+requires = ["libreoffice"]
+
+
 
