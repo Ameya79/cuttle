@@ -23,6 +23,7 @@ from pathlib import Path
 import filetype
 import pillow_heif
 import psutil
+import pypdf
 import typer
 from PIL import Image
 
@@ -57,8 +58,9 @@ def _resolve_binary_info(tool_name: str) -> dict[str, object]:
 
     version_str: str | None = None
     try:
+        flag = "-version" if tool_name.startswith("ff") else "--version"
         res = subprocess.run(
-            [target_bin, "-version"],
+            [target_bin, flag],
             capture_output=True,
             text=True,
             check=False,
@@ -74,14 +76,45 @@ def _resolve_binary_info(tool_name: str) -> dict[str, object]:
 
 @app.command(name="convert")
 def convert_command(
-    src: Path = typer.Argument(..., help="Path to the file to convert."),
+    src: Path = typer.Argument(..., help="Path to the file or directory to convert."),
     to: str = typer.Option(..., "--to", "-t", help="Target format ID (e.g. mp3, jpg, webm)."),
     out: Path | None = typer.Option(None, "--out", "-o", help="Output directory."),
     json_mode: bool = typer.Option(
         False, "--json", help="Emit NDJSON stream instead of formatted text."
     ),
+    recursive: bool = typer.Option(
+        True,
+        "--recursive/--no-recursive",
+        "-r/-R",
+        help="Recursively convert files if src is a directory.",
+    ),
+    filter_ext: str | None = typer.Option(
+        None,
+        "--filter",
+        help="Comma-separated extensions to include when converting a directory.",
+    ),
 ) -> None:
-    """Convert a file to the target format."""
+    """Convert a file or an entire directory to the target format."""
+    if src.is_dir():
+        from cuttle.engine.folder import convert_folder
+
+        ext_set = [e.strip() for e in filter_ext.split(",")] if filter_ext else None
+        f_res = convert_folder(src, to, out_dir=out, recursive=recursive, ext_filter=ext_set)
+        if json_mode:
+            payload = {
+                "type": "folder_summary",
+                "total": f_res.total_files,
+                "succeeded": f_res.succeeded,
+                "failed": f_res.failed,
+                "skipped": f_res.skipped,
+            }
+            typer.echo(json.dumps(payload))
+        else:
+            typer.echo(
+                f"Folder conversion complete: {f_res.succeeded} succeeded, "
+                f"{f_res.failed} failed, {f_res.skipped} skipped out of {f_res.total_files} files."
+            )
+        raise typer.Exit(code=0 if f_res.failed == 0 else 1)
 
     def on_progress(pct: float | None, msg: str = "") -> None:
         if json_mode:
@@ -233,6 +266,7 @@ def doctor_command(
         "pillow-heif": {"version": getattr(pillow_heif, "__version__", "unknown")},
         "filetype": {"version": getattr(filetype, "__version__", "unknown")},
         "psutil": {"version": getattr(psutil, "__version__", "unknown")},
+        "pypdf": {"version": getattr(pypdf, "__version__", "unknown")},
     }
 
     # Core required tools for Phase 1 are ffmpeg and ffprobe
