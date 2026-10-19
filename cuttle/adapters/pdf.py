@@ -157,3 +157,43 @@ def validate_pdf(
                 warnings.append("Some fonts were replaced, layout may shift")
 
     return ValidationResult(ok=True, warnings=warnings)
+
+
+def is_scanned_pdf(
+    pdf_path: Path,
+    password: str | None = None,
+    max_pages: int = 3,
+    min_chars: int = 30,
+) -> bool:
+    """Detect if a PDF is primarily scanned / image-based rather than text.
+
+    Per TRD P5-01:
+    A PDF is considered 'scanned' when text extraction across the first
+    `max_pages` pages (default 3) returns almost nothing (< `min_chars`).
+
+    Args:
+        pdf_path: Path to the PDF file.
+        password: Optional decryption password.
+        max_pages: Maximum number of leading pages to sample (default: 3).
+        min_chars: Character count threshold below which the document is
+            classified as scanned (default: 30 non-whitespace characters).
+
+    Returns:
+        True if the PDF is scanned / contains minimal text, False otherwise.
+    """
+    reader = check_pdf_password(pdf_path, password=password)
+    sample_pages = reader.pages[:max_pages]
+    if not sample_pages:
+        return True
+
+    total_chars = 0
+    for page in sample_pages:
+        try:
+            text = page.extract_text() or ""
+            # Strip all whitespace characters to count actual textual glyphs
+            cleaned = "".join(text.split())
+            total_chars += len(cleaned)
+        except Exception:
+            continue
+
+    return total_chars < min_chars
