@@ -8,3 +8,10 @@ version = "8.1.3"
 url = "https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2026-10-17-20-51/ffmpeg-n8.1.3-18-g46d899d7a0-win64-gpl-8.1.zip"
 sha256 = "65a54333e273d995943163894f596f3138b619c79b1b0e7f5fbc0b21c61f35d6"
 binaries = ["ffmpeg.exe", "ffprobe.exe"]
+
+[tools.pandoc]
+name = "pandoc"
+version = "3.6.3"
+url = "https://github.com/jgm/pandoc/releases/download/3.6.3/pandoc-3.6.3-windows-x86_64.zip"
+sha256 = "a31dc5b14a235efa1f2cf103f71f656eeb76ce1b458d22d24f390c66db7224f1"
+binaries = ["pandoc.exe"]
