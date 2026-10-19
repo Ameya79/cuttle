@@ -244,6 +244,106 @@ def generate_nasty_inputs(
     return created
 
 
+def generate_documents(out_dir: Path) -> dict[str, Path]:
+    """Generate synthetic document fixtures (md, html, txt, docx, pdf, locked, fonts)."""
+    import zipfile
+
+    import pypdf
+
+    created: dict[str, Path] = {}
+
+    # 1. doc.md
+    md_path = out_dir / "doc.md"
+    md_path.write_text(
+        "# Cuttle Document Test\n\n"
+        "Testing offline conversion from Markdown.\n\n"
+        "## Features\n\n"
+        "- Zero telemetry\n- 100% offline\n- Safe atomic commits\n",
+        encoding="utf-8",
+    )
+    created["md"] = md_path
+
+    # 2. doc.html
+    html_path = out_dir / "doc.html"
+    html_path.write_text(
+        "<!DOCTYPE html>\n<html><head><title>Test Page</title></head>\n"
+        "<body><h1>Cuttle HTML Test</h1><p>Offline conversion test.</p></body></html>",
+        encoding="utf-8",
+    )
+    created["html"] = html_path
+
+    # 3. doc.txt
+    txt_path = out_dir / "doc.txt"
+    txt_path.write_text("Cuttle plain text fixture document.\nSecond line.\n", encoding="utf-8")
+    created["txt"] = txt_path
+
+    # 4. doc.docx
+    docx_path = out_dir / "doc.docx"
+    pandoc_tool = out_dir.parent.parent / "vendor" / "pandoc.exe"
+    if pandoc_tool.is_file():
+        subprocess.run(
+            [str(pandoc_tool), "-f", "markdown", "-t", "docx", str(md_path), "-o", str(docx_path)],
+            check=True,
+            capture_output=True,
+        )
+    else:
+        with zipfile.ZipFile(docx_path, "w") as z:
+            z.writestr(
+                "[Content_Types].xml",
+                '<?xml version="1.0" encoding="UTF-8"?>'
+                '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"/>',
+            )
+            z.writestr(
+                "word/document.xml",
+                '<?xml version="1.0" encoding="UTF-8"?>'
+                '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'
+                "<w:body><w:p><w:r><w:t>Hello from DOCX</w:t></w:r></w:p></w:body></w:document>",
+            )
+    created["docx"] = docx_path
+
+    # 5. fonts_missing.docx
+    fonts_missing_path = out_dir / "fonts_missing.docx"
+    with zipfile.ZipFile(fonts_missing_path, "w") as z:
+        z.writestr(
+            "[Content_Types].xml",
+            '<?xml version="1.0" encoding="UTF-8"?>'
+            '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"/>',
+        )
+        z.writestr(
+            "word/document.xml",
+            '<?xml version="1.0" encoding="UTF-8"?>'
+            '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'
+            "<w:body><w:p><w:r><w:t>Rare Font Test</w:t></w:r></w:p></w:body></w:document>",
+        )
+        z.writestr(
+            "word/fontTable.xml",
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+            '<w:fonts xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'
+            '<w:font w:name="ObscureFantasyScriptPro"/>'
+            "</w:fonts>",
+        )
+    created["fonts_missing_docx"] = fonts_missing_path
+
+    # 6. doc.pdf
+    pdf_path = out_dir / "doc.pdf"
+    writer = pypdf.PdfWriter()
+    writer.add_blank_page(width=200, height=200)
+    with open(pdf_path, "wb") as f:
+        writer.write(f)
+    created["pdf"] = pdf_path
+
+    # 7. locked.pdf
+    locked_pdf_path = out_dir / "locked.pdf"
+    enc_writer = pypdf.PdfWriter()
+    enc_writer.add_blank_page(width=200, height=200)
+    enc_writer.encrypt("secret123")
+    with open(locked_pdf_path, "wb") as f:
+        enc_writer.write(f)
+    created["locked_pdf"] = locked_pdf_path
+
+    return created
+
+
 def generate_all_fixtures(target_dir: Path | None = None) -> dict[str, Path]:
     """Generate all test fixtures into the specified directory."""
     fixtures_dir = target_dir or (Path(__file__).resolve().parent / "fixtures")
@@ -259,6 +359,9 @@ def generate_all_fixtures(target_dir: Path | None = None) -> dict[str, Path]:
     print("  Generating audio and video (FFmpeg) ...")
     av_files = generate_audio_video(fixtures_dir, ffmpeg_bin)
     all_files.update(av_files)
+
+    print("  Generating documents (Markdown, HTML, DOCX, PDF) ...")
+    all_files.update(generate_documents(fixtures_dir))
 
     print("  Generating hostile / nasty edge-case inputs ...")
     nasty_files = generate_nasty_inputs(fixtures_dir, av_files["video_av"], all_files["png"])
