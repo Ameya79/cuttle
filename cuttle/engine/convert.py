@@ -102,6 +102,10 @@ def get_adapter(adapter_name: str) -> BaseAdapter:
         from cuttle.adapters.ocr import OcrAdapter
 
         return OcrAdapter()
+    if adapter_name == "image_pdf":
+        from cuttle.adapters.image_pdf import ImagePdfAdapter
+
+        return ImagePdfAdapter()
 
     raise CuttleError(
         code="E_TOOL_MISSING",

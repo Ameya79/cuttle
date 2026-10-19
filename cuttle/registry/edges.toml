@@ -598,3 +598,61 @@ quality = "best_effort"
 cost = 6
 label = "DOCX (Word document)"
 
+# --- PDF and Image Extras (Phase 5) ---
+[[edge]]
+src = "pdf"
+dst = "png"
+adapter = "image_pdf"
+quality = "lossless"
+cost = 3
+label = "PNG image (pages)"
+
+[[edge]]
+src = "pdf"
+dst = "jpg"
+adapter = "image_pdf"
+quality = "lossy"
+cost = 3
+label = "JPG image (pages)"
+
+[[edge]]
+src = "png"
+dst = "pdf"
+adapter = "image_pdf"
+quality = "lossless"
+cost = 2
+label = "PDF document"
+
+[[edge]]
+src = "jpg"
+dst = "pdf"
+adapter = "image_pdf"
+quality = "lossy"
+cost = 2
+label = "PDF document"
+
+[[edge]]
+src = "webp"
+dst = "pdf"
+adapter = "image_pdf"
+quality = "lossy"
+cost = 2
+label = "PDF document"
+
+[[edge]]
+src = "bmp"
+dst = "pdf"
+adapter = "image_pdf"
+quality = "lossless"
+cost = 2
+label = "PDF document"
+
+[[edge]]
+src = "tiff"
+dst = "pdf"
+adapter = "image_pdf"
+quality = "lossless"
+cost = 2
+label = "PDF document"
+
+

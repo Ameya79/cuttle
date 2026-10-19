@@ -82,6 +82,10 @@ module = [
     "pypdf.*",
     "pdf2docx",
     "pdf2docx.*",
+    "pymupdf",
+    "pymupdf.*",
+    "fitz",
+    "fitz.*",
 ]
 ignore_missing_imports = true
 
