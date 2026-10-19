@@ -5,6 +5,17 @@ All notable changes to Cuttle will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.5.0] - Phase 5: Hard Conversions
+
+### Added
+- **Scanned PDF Detection (P5-01)**: `cuttle/adapters/pdf.py` detects image-only / non-searchable PDFs by inspecting glyph density across leading pages via `pypdf`.
+- **PDF to Word Adapter (P5-02)**: `cuttle/adapters/pdf2docx_adapter.py` converts text-rich PDFs to `.docx` documents with `best_effort` quality and warning 'Tables and complex layouts may need touch ups.' Gracefully rejects scanned PDFs lacking text.
+- **OCR Pipeline & Tool Detection (P5-03)**: `cuttle/adapters/ocr.py` detects host installations of Tesseract-OCR and OCRmyPDF, running OCR to produce searchable PDFs and chaining into `pdf2docx` when converting scanned files to Word. Raises clear `E_TOOL_MISSING` guidance when absent.
+- **PDF & Image Extras (P5-04)**: `cuttle/adapters/image_pdf.py` renders multi-page PDFs into image files (`png`, `jpg`), converts images to PDF, and merges multiple selected images into a single multi-page PDF document preserving exact ordering.
+- **DWG CAD Add-On (P5-05)**: `cuttle/adapters/dwg.py` detects LibreDWG (`dwg2dxf`) and ODA File Converter on the machine, converts DWG drawings to DXF, and renders them to high-resolution PDF via headless LibreOffice Draw. Provides comprehensive user guide at `docs/dwg-addon.md`.
+- **Quality Report Matrix (P5-06)**: `scripts/make_quality_report.py` and `docs/quality.md` documenting every supported conversion pair, quality level, adapter, and known technical boundaries.
+- **Phase 5 Exit Gate (P5-07)**: Integration pipeline tests in `tests/integration/test_phase5_pipeline.py` verifying full end-to-end functionality, warning propagation, and offline guarantees.
+
 ## [0.4.0] - Phase 4: Windows 11 Top-Level Context Menu & Native Speed
 
 ### Added

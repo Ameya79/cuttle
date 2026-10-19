@@ -143,7 +143,7 @@ def _run_single_edge(
     tmp_out: Path,
     on_progress: ProgressCb,
     cancel: CancelToken,
-) -> None:
+) -> list[str]:
     """Execute a single conversion edge using its registered adapter and validate."""
     adapter = get_adapter(edge.adapter)
     plan = adapter.plan(src, edge.dst, tmp_out, edge.options)
@@ -156,6 +156,7 @@ def _run_single_edge(
             user_message=f"Output validation failed: {v_res.reason}",
             detail=v_res.reason,
         )
+    return list(v_res.warnings)
 
 
 def _noop_progress(pct: float | None, msg: str = "") -> None:
@@ -215,7 +216,8 @@ def convert(
     with temp_output(intended_final) as tmp_out:
         if path.is_direct:
             # Single-hop conversion
-            _run_single_edge(path.edges[0], src, tmp_out, prog_cb, cancel_token)
+            w = _run_single_edge(path.edges[0], src, tmp_out, prog_cb, cancel_token)
+            warnings.extend(w)
         else:
             # 2-hop conversion: src -> tmp_mid -> tmp_out
             e1, e2 = path.edges
@@ -227,14 +229,16 @@ def convert(
                     scaled = pct * 0.5 if pct is not None else None
                     prog_cb(scaled, f"Step 1/2: {msg}")
 
-                _run_single_edge(e1, src, tmp_mid, hop1_prog, cancel_token)
+                w1 = _run_single_edge(e1, src, tmp_mid, hop1_prog, cancel_token)
+                warnings.extend(w1)
 
                 # Hop 2
                 def hop2_prog(pct: float | None, msg: str = "") -> None:
                     scaled = 50.0 + pct * 0.5 if pct is not None else None
                     prog_cb(scaled, f"Step 2/2: {msg}")
 
-                _run_single_edge(e2, tmp_mid, tmp_out, hop2_prog, cancel_token)
+                w2 = _run_single_edge(e2, tmp_mid, tmp_out, hop2_prog, cancel_token)
+                warnings.extend(w2)
 
         # 7. Atomic commit with collision avoidance
         committed_file = commit_output(tmp_out, dest_dir, src.stem, target_fmt)
