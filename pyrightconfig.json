@@ -1,0 +1,8 @@
+{
+  "venvPath": ".",
+  "venv": ".venv",
+  "pythonVersion": "3.12",
+  "pythonPlatform": "Windows",
+  "include": ["cuttle"],
+  "exclude": ["**/__pycache__", ".venv"]
+}

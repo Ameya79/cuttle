@@ -43,10 +43,11 @@ def call_pipe(pipe_name: str, payload: bytes, timeout_ms: int = 3000) -> bytes:
         raise RuntimeError("pywin32 is required to call Windows Named Pipes.")
 
     start = time.monotonic()
+    raw_payload: Any = payload
     while True:
         try:
-            res = win32pipe.CallNamedPipe(pipe_name, payload, BUF_SIZE, timeout_ms)
-            return bytes(res)
+            res = win32pipe.CallNamedPipe(pipe_name, raw_payload, BUF_SIZE, timeout_ms)
+            return res.encode("utf-8") if isinstance(res, str) else bytes(res)
         except Exception as e:
             err_code = getattr(e, "winerror", None)
             if err_code is None and hasattr(e, "args") and e.args:
@@ -84,6 +85,10 @@ class WindowsPipeServer:
 
     def run(self) -> None:
         """Run the server accept loop (blocks until stop() is called)."""
+        if win32pipe is None or win32file is None:
+            return
+
+        sec_attr: Any = None
         while not self._stopped:
             try:
                 handle = win32pipe.CreateNamedPipe(
@@ -96,7 +101,7 @@ class WindowsPipeServer:
                     BUF_SIZE,
                     BUF_SIZE,
                     0,
-                    None,
+                    sec_attr,
                 )
             except Exception:
                 if self._stopped:
@@ -115,7 +120,8 @@ class WindowsPipeServer:
 
                 # Read message
                 _, data = win32file.ReadFile(handle, BUF_SIZE)
-                response = self._handler(data)
+                data_bytes = data if isinstance(data, bytes) else str(data).encode("utf-8")
+                response = self._handler(data_bytes)
                 win32file.WriteFile(handle, response)
             except Exception:
                 pass
@@ -137,4 +143,10 @@ class WindowsPipeServer:
         # Send wake signal to unblock ConnectNamedPipe
         with contextlib.suppress(Exception):
             if win32pipe is not None:
-                win32pipe.CallNamedPipe(self.pipe_name, b'{"op":"shutdown"}', 1024, 500)
+                shutdown_payload: Any = b'{"op":"shutdown"}'
+                win32pipe.CallNamedPipe(
+                    self.pipe_name,
+                    shutdown_payload,
+                    1024,
+                    500,
+                )

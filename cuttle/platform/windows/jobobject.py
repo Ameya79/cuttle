@@ -40,7 +40,7 @@ class WindowsJobObject:
 
     def assign_process(self, pid: int) -> bool:
         """Assign a process to this Job Object by PID."""
-        if self._closed or win32api is None or win32job is None:
+        if self._closed or win32api is None or win32job is None or win32con is None:
             return False
         try:
             flags = win32con.PROCESS_SET_QUOTA | win32con.PROCESS_TERMINATE
