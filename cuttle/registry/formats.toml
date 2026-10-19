@@ -73,3 +73,44 @@ magic = "tiff"
 kind = "image"
 ext = ["heic", "heif"]
 magic = "ftyp_heic"
+
+# Documents (Phase 3)
+[formats.md]
+kind = "document"
+ext = ["md", "markdown"]
+magic = "text_markdown"
+
+[formats.html]
+kind = "document"
+ext = ["html", "htm"]
+magic = "text_html"
+
+[formats.docx]
+kind = "document"
+ext = ["docx"]
+magic = "zip_docx"
+
+[formats.txt]
+kind = "document"
+ext = ["txt"]
+magic = "text_plain"
+
+[formats.pdf]
+kind = "document"
+ext = ["pdf"]
+magic = "pdf"
+
+[formats.pptx]
+kind = "document"
+ext = ["pptx"]
+magic = "zip_pptx"
+
+[formats.xlsx]
+kind = "document"
+ext = ["xlsx"]
+magic = "zip_xlsx"
+
+[formats.odt]
+kind = "document"
+ext = ["odt"]
+magic = "zip_odt"

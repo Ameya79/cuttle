@@ -449,3 +449,142 @@ adapter = "image"
 quality = "lossy"
 cost = 3
 label = "WebP (image)"
+
+# --- Documents via Pandoc (Phase 3) ---
+
+[[edge]]
+src = "md"
+dst = "docx"
+adapter = "pandoc"
+quality = "lossless"
+cost = 3
+label = "Word document (DOCX)"
+requires = ["pandoc"]
+
+[[edge]]
+src = "md"
+dst = "html"
+adapter = "pandoc"
+quality = "lossless"
+cost = 2
+label = "HTML web page"
+requires = ["pandoc"]
+
+[[edge]]
+src = "md"
+dst = "txt"
+adapter = "pandoc"
+quality = "lossless"
+cost = 1
+label = "Plain text (TXT)"
+requires = ["pandoc"]
+
+[[edge]]
+src = "html"
+dst = "md"
+adapter = "pandoc"
+quality = "lossless"
+cost = 2
+label = "Markdown"
+requires = ["pandoc"]
+
+[[edge]]
+src = "html"
+dst = "docx"
+adapter = "pandoc"
+quality = "lossless"
+cost = 3
+label = "Word document (DOCX)"
+requires = ["pandoc"]
+
+[[edge]]
+src = "docx"
+dst = "md"
+adapter = "pandoc"
+quality = "lossy"
+cost = 3
+label = "Markdown"
+requires = ["pandoc"]
+
+[[edge]]
+src = "docx"
+dst = "txt"
+adapter = "pandoc"
+quality = "lossy"
+cost = 2
+label = "Plain text (TXT)"
+requires = ["pandoc"]
+
+[[edge]]
+src = "docx"
+dst = "html"
+adapter = "pandoc"
+quality = "lossy"
+cost = 3
+label = "HTML web page"
+requires = ["pandoc"]
+
+[[edge]]
+src = "txt"
+dst = "md"
+adapter = "pandoc"
+quality = "lossless"
+cost = 1
+label = "Markdown"
+requires = ["pandoc"]
+
+[[edge]]
+src = "txt"
+dst = "docx"
+adapter = "pandoc"
+quality = "lossless"
+cost = 2
+label = "Word document (DOCX)"
+requires = ["pandoc"]
+
+[[edge]]
+src = "txt"
+dst = "html"
+adapter = "pandoc"
+quality = "lossless"
+cost = 2
+label = "HTML web page"
+requires = ["pandoc"]
+
+# --- Office Documents to PDF via LibreOffice (Phase 3) ---
+
+[[edge]]
+src = "docx"
+dst = "pdf"
+adapter = "libreoffice"
+quality = "lossless"
+cost = 4
+label = "PDF document"
+requires = ["libreoffice"]
+
+[[edge]]
+src = "pptx"
+dst = "pdf"
+adapter = "libreoffice"
+quality = "lossless"
+cost = 4
+label = "PDF document"
+requires = ["libreoffice"]
+
+[[edge]]
+src = "xlsx"
+dst = "pdf"
+adapter = "libreoffice"
+quality = "lossless"
+cost = 4
+label = "PDF document"
+requires = ["libreoffice"]
+
+[[edge]]
+src = "odt"
+dst = "pdf"
+adapter = "libreoffice"
+quality = "lossless"
+cost = 4
+label = "PDF document"
+requires = ["libreoffice"]
