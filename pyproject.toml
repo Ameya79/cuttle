@@ -1,6 +1,6 @@
 [project]
 name = "cuttle"
-version = "0.2.0"
+version = "1.0.0"
 description = "Right-click any file, pick a format, get a converted copy. Offline, open-source, Windows."
 readme = "README.md"
 license = "GPL-3.0-only"
@@ -10,7 +10,7 @@ authors = [
 ]
 keywords = ["file-converter", "ffmpeg", "right-click", "windows", "offline"]
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 5 - Production/Stable",
     "Environment :: Win32 (MS Windows)",
     "Intended Audience :: End Users/Desktop",
     "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",

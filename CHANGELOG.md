@@ -5,6 +5,18 @@ All notable changes to Cuttle will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.0.0] - Phase 6: General Availability Release
+
+### Added
+- **PyInstaller Bundling & Inno Setup Installer (P6-01)**: `packaging/cuttle.spec` bundling native `cuttlectl.exe`, `cuttle-worker.exe`, `cuttle_shell.dll`, sparse package `AppxManifest.xml`, and conversion dependencies. `packaging/installer.iss` creating official Inno Setup installer with automatic Windows 11 sparse package registration and uninstall cleanup.
+- **Automated Distribution & Signing Scripts (P6-01 & P6-02)**: `scripts/build_dist.py` for automated PyInstaller builds, Inno Setup compilation, portable `.zip` creation, and SHA256 checksum generation. `scripts/sign_binaries.ps1` for Authenticode code signing with self-signed test certificate generation and timestamping. `packaging/release-workflow.yml` prepared for GitHub Actions CI/CD releases.
+- **Package Manager Manifests (P6-03)**: Official package manifests for Windows Package Manager (`packaging/winget/cuttle.yaml`), Scoop (`packaging/scoop/cuttle.json`), and Chocolatey (`packaging/chocolatey/cuttle.nuspec`, `chocolateyinstall.ps1`, `chocolateyuninstall.ps1`).
+- **Third-Party Notices & GPL Source Offer (P6-04)**: `scripts/make_notices.py` generating comprehensive `THIRD_PARTY_NOTICES.md` cataloging every bundled open-source tool and library (FFmpeg, Pandoc, PySide6, pdf2docx, PyMuPDF, Pillow, etc.) with explicit GPL-3.0 written source offer.
+- **Modern Static Landing Page & Portal (P6-05)**: `site/index.html`, `site/styles.css`, and `site/script.js` featuring dark-mode glassmorphic aesthetics, 100% offline privacy guarantee, simulated Windows 11 context menu demo widget, format explorer with live category filters, one-click installer downloads, and terminal copy pills.
+- **In-App Update Check (P6-06)**: `cuttle/worker/updater.py` checking GitHub Releases API with 24-hour cache cooldown, semantic version parsing, SHA-256 integrity verification, and non-intrusive Windows toast notifications without automated downloading or executing. Engine remains 100% offline.
+- **Beta Test Kit & Diagnostics (P6-07)**: `cuttle/ui/diagnostics.py` diagnostic report collector with automated Windows username/path redaction, `docs/beta-test-script.md` guide for beta testers, and GitHub issue templates (`bug_report.md`, `bad_conversion.md`, `format_request.md`).
+- **Phase 6 Exit Gate (P6-08)**: End-to-end integration test `tests/integration/test_release_pipeline.py` verifying full build, packaging, licensing, update checking, and security guarantees.
+
 ## [0.5.0] - Phase 5: Hard Conversions
 
 ### Added

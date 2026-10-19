@@ -114,7 +114,9 @@ def check_for_updates(
 
     Returns UpdateInfo if an update is available, or None if up to date or offline.
     """
-    curr = current_version or getattr(cuttle, "__version__", "0.1.0")
+    curr: str = (
+        str(current_version) if current_version else str(getattr(cuttle, "__version__", "1.0.0"))
+    )
     cache_file = cache_path or get_default_update_cache_path()
 
     # 1. Check local cache cooldown unless forced
