@@ -58,3 +58,4 @@ coverage.xml
 # Planning documents (large binary, keep locally)
 *.pdf
 extracted_docs.txt
+cuttle-os-explained.html

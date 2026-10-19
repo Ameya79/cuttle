@@ -1,0 +1,70 @@
+name: Release Cuttle
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-release:
+    name: Build & Package Windows Release
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Set up astral-sh/setup-uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: 'latest'
+
+      - name: Install Inno Setup Compiler
+        run: choco install innosetup --no-progress
+
+      - name: Set up MinGW GCC Compiler
+        uses: egor-tensin/setup-mingw@v2
+        with:
+          platform: x64
+
+      - name: Install Dependencies
+        run: |
+          uv sync --all-extras
+          uv run python scripts/fetch_tools.py
+
+      - name: Run Test Suite
+        run: uv run pytest
+
+      - name: Run Linters and Type Checks
+        run: |
+          uv run ruff check .
+          uv run ruff format --check .
+          uv run mypy cuttle
+
+      - name: Build Distribution Packages
+        run: uv run python scripts/build_dist.py
+
+      - name: Sign Executables and Installer
+        shell: powershell
+        run: |
+          powershell -ExecutionPolicy Bypass -File scripts/sign_binaries.ps1
+
+      - name: Create Draft GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          prerelease: false
+          generate_release_notes: true
+          files: |
+            dist/*.exe
+            dist/*.zip
+            dist/SHA256SUMS.txt

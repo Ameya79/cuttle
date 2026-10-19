@@ -3,8 +3,10 @@
 
 Produces a standalone dist/Cuttle/ directory containing:
 - cuttle.exe: CLI converter (console=True)
-- cuttlectl.exe: Ultra-fast right-click dispatcher (console=False)
+- cuttlectl.exe: Ultra-fast Win32 native right-click dispatcher
 - cuttle-worker.exe: Background worker daemon (console=False)
+- cuttle_shell.dll: Native COM Explorer context menu DLL
+- AppxManifest.xml: Sparse package identity manifest for Windows 11
 """
 
 from pathlib import Path
@@ -14,19 +16,27 @@ block_cipher = None
 
 ROOT_DIR = Path(SPECPATH).resolve().parent
 
-# Data files: formats.toml, edges.toml, and assets
+# Data files: formats.toml, edges.toml, assets, AppxManifest
 datas = [
     (str(ROOT_DIR / "cuttle" / "registry" / "*.toml"), "cuttle/registry"),
     (str(ROOT_DIR / "assets" / "*.*"), "assets"),
+    (str(ROOT_DIR / "packaging" / "AppxManifest.xml"), "packaging"),
+    (str(ROOT_DIR / "scripts" / "register_sparse_package.ps1"), "scripts"),
+    (str(ROOT_DIR / "scripts" / "unregister_sparse_package.ps1"), "scripts"),
 ]
 icon_path = str(ROOT_DIR / "assets" / "cuttle.ico")
 
-# Binaries: vendor tools if present
+# Binaries: vendor tools and native C++ binaries
 binaries = []
 vendor_dir = ROOT_DIR / "vendor"
 if vendor_dir.is_dir():
     for exe in vendor_dir.glob("*.exe"):
         binaries.append((str(exe), "vendor"))
+
+# Native Windows COM shell DLL if compiled
+native_dll = ROOT_DIR / "cuttle" / "platform" / "windows" / "shell_extension" / "cuttle_shell.dll"
+if native_dll.is_file():
+    binaries.append((str(native_dll), "."))
 
 # 1. cuttle CLI executable
 a_cli = Analysis(
@@ -34,7 +44,16 @@ a_cli = Analysis(
     pathex=[str(ROOT_DIR)],
     binaries=binaries,
     datas=datas,
-    hiddenimports=["typer", "pillow_heif", "filetype", "psutil"],
+    hiddenimports=[
+        "typer",
+        "pillow_heif",
+        "filetype",
+        "psutil",
+        "pypdf",
+        "pdf2docx",
+        "pymupdf",
+        "PIL",
+    ],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
@@ -64,7 +83,54 @@ exe_cli = EXE(
     icon=icon_path,
 )
 
-# 2. cuttlectl fast launcher executable
+# 2. cuttle-worker daemon executable
+a_worker = Analysis(
+    [str(ROOT_DIR / "cuttle" / "worker" / "main.py")],
+    pathex=[str(ROOT_DIR)],
+    binaries=binaries,
+    datas=datas,
+    hiddenimports=[
+        "PySide6",
+        "windows_toasts",
+        "pywin32",
+        "win32file",
+        "win32pipe",
+        "win32job",
+        "pdf2docx",
+        "pymupdf",
+        "pypdf",
+        "PIL",
+    ],
+    hookspath=[],
+    hooksconfig={},
+    runtime_hooks=[],
+    excludes=[],
+    win_no_prefer_redirects=False,
+    win_private_assemblies=False,
+    cipher=block_cipher,
+    noarchive=False,
+)
+pyz_worker = PYZ(a_worker.pure, a_worker.zipped_data, cipher=block_cipher)
+exe_worker = EXE(
+    pyz_worker,
+    a_worker.scripts,
+    [],
+    exclude_binaries=True,
+    name="cuttle-worker",
+    debug=False,
+    bootloader_ignore_signals=False,
+    strip=False,
+    upx=True,
+    console=False,
+    disable_windowed_traceback=False,
+    argv_emulation=False,
+    target_arch=None,
+    codesign_identity=None,
+    entitlements_file=None,
+    icon=icon_path,
+)
+
+# 3. cuttlectl fallback Python launcher (overridden by native binary if compiled)
 a_ctl = Analysis(
     [str(ROOT_DIR / "cuttle" / "worker" / "cuttlectl.py")],
     pathex=[str(ROOT_DIR)],
@@ -100,43 +166,7 @@ exe_ctl = EXE(
     icon=icon_path,
 )
 
-# 3. cuttle-worker daemon executable
-a_worker = Analysis(
-    [str(ROOT_DIR / "cuttle" / "worker" / "main.py")],
-    pathex=[str(ROOT_DIR)],
-    binaries=binaries,
-    datas=datas,
-    hiddenimports=["PySide6", "windows_toasts", "pywin32"],
-    hookspath=[],
-    hooksconfig={},
-    runtime_hooks=[],
-    excludes=[],
-    win_no_prefer_redirects=False,
-    win_private_assemblies=False,
-    cipher=block_cipher,
-    noarchive=False,
-)
-pyz_worker = PYZ(a_worker.pure, a_worker.zipped_data, cipher=block_cipher)
-exe_worker = EXE(
-    pyz_worker,
-    a_worker.scripts,
-    [],
-    exclude_binaries=True,
-    name="cuttle-worker",
-    debug=False,
-    bootloader_ignore_signals=False,
-    strip=False,
-    upx=True,
-    console=False,
-    disable_windowed_traceback=False,
-    argv_emulation=False,
-    target_arch=None,
-    codesign_identity=None,
-    entitlements_file=None,
-    icon=icon_path,
-)
-
-# COLLECT all three executables and shared dependencies into dist/Cuttle/
+# COLLECT all executables and shared dependencies into dist/Cuttle/
 coll = COLLECT(
     exe_cli,
     a_cli.binaries,
