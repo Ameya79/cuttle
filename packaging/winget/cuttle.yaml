@@ -1,0 +1,32 @@
+PackageIdentifier: Ameya79.Cuttle
+PackageVersion: 1.0.0
+PackageName: Cuttle
+Publisher: Cuttle Contributors
+PublisherUrl: https://github.com/Ameya79/cuttle
+PublisherSupportUrl: https://github.com/Ameya79/cuttle/issues
+Author: Vinay
+License: GPL-3.0-only
+LicenseUrl: https://github.com/Ameya79/cuttle/blob/main/LICENSE
+Copyright: Copyright (c) 2026 Cuttle Contributors
+ShortDescription: Offline Windows right-click file converter
+Description: |
+  Right-click any file, pick a format, and get a converted copy next to the original.
+  100% offline, privacy-first, free and open source. Converts video, audio, images,
+  office documents, PDFs, scanned OCR documents, and CAD drawings without cloud servers.
+Moniker: cuttle
+Tags:
+  - converter
+  - offline
+  - privacy
+  - ffmpeg
+  - context-menu
+  - right-click
+Installers:
+  - Architecture: x64
+    InstallerType: inno
+    Scope: user
+    InstallerUrl: https://github.com/Ameya79/cuttle/releases/download/v1.0.0/Cuttle-Setup-x64.exe
+    InstallerSha256: 0000000000000000000000000000000000000000000000000000000000000000
+    UpgradeBehavior: install
+ManifestType: singleton
+ManifestVersion: 1.6.0

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+  <metadata>
+    <id>cuttle</id>
+    <version>1.0.0</version>
+    <packageSourceUrl>https://github.com/Ameya79/cuttle/tree/main/packaging/chocolatey</packageSourceUrl>
+    <owners>Vinay</owners>
+    <title>Cuttle</title>
+    <authors>Cuttle Contributors</authors>
+    <projectUrl>https://github.com/Ameya79/cuttle</projectUrl>
+    <iconUrl>https://raw.githubusercontent.com/Ameya79/cuttle/main/assets/cuttle.ico</iconUrl>
+    <copyright>Copyright (c) 2026 Cuttle Contributors</copyright>
+    <licenseUrl>https://github.com/Ameya79/cuttle/blob/main/LICENSE</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <projectSourceUrl>https://github.com/Ameya79/cuttle</projectSourceUrl>
+    <docsUrl>https://github.com/Ameya79/cuttle/blob/main/docs/quality.md</docsUrl>
+    <bugTrackerUrl>https://github.com/Ameya79/cuttle/issues</bugTrackerUrl>
+    <tags>cuttle converter file-converter offline right-click context-menu ffmpeg</tags>
+    <summary>Offline Windows right-click file converter</summary>
+    <description>
+      Right-click any file, pick a format, and get a converted copy next to the original.
+      100% offline, privacy-first, free and open source. Converts video, audio, images,
+      office documents, PDFs, scanned OCR documents, and CAD drawings without cloud servers.
+    </description>
+    <releaseNotes>https://github.com/Ameya79/cuttle/releases/tag/v1.0.0</releaseNotes>
+  </metadata>
+  <files>
+    <file src="tools\**" target="tools" />
+  </files>
+</package>
