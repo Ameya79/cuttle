@@ -98,6 +98,10 @@ def get_adapter(adapter_name: str) -> BaseAdapter:
         from cuttle.adapters.pdf2docx_adapter import Pdf2DocxAdapter
 
         return Pdf2DocxAdapter()
+    if adapter_name == "ocr":
+        from cuttle.adapters.ocr import OcrAdapter
+
+        return OcrAdapter()
 
     raise CuttleError(
         code="E_TOOL_MISSING",

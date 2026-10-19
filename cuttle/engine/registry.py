@@ -18,7 +18,9 @@ from cuttle.engine.types import Edge, Quality
 
 # Allowed adapter identifiers across all phases.
 # Adding a new adapter requires explicitly adding it to this set.
-KNOWN_ADAPTERS = frozenset({"ffmpeg", "image", "libreoffice", "pandoc", "pdf", "pdf2docx"})
+KNOWN_ADAPTERS = frozenset(
+    {"ffmpeg", "image", "libreoffice", "pandoc", "pdf", "pdf2docx", "ocr", "dwg"}
+)
 
 # Allowed format kinds.
 ALLOWED_KINDS = frozenset({"video", "audio", "image", "document"})
