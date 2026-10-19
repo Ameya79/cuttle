@@ -30,6 +30,7 @@ dependencies = [
     "windows-toasts>=1.1.0; sys_platform == 'win32'",
     "PySide6>=6.6",
     "pypdf>=4.0",
+    "pdf2docx>=0.5.13",
 ]
 
 [project.scripts]
@@ -79,6 +80,8 @@ module = [
     "PySide6.*",
     "pypdf",
     "pypdf.*",
+    "pdf2docx",
+    "pdf2docx.*",
 ]
 ignore_missing_imports = true
 

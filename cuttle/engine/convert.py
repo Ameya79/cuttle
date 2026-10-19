@@ -94,6 +94,10 @@ def get_adapter(adapter_name: str) -> BaseAdapter:
         return PandocAdapter()
     if adapter_name == "libreoffice":
         return LibreOfficeAdapter()
+    if adapter_name == "pdf2docx":
+        from cuttle.adapters.pdf2docx_adapter import Pdf2DocxAdapter
+
+        return Pdf2DocxAdapter()
 
     raise CuttleError(
         code="E_TOOL_MISSING",

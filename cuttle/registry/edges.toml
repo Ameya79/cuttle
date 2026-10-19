@@ -588,3 +588,13 @@ quality = "lossless"
 cost = 4
 label = "PDF document"
 requires = ["libreoffice"]
+
+# --- PDF to Word (Phase 5) ---
+[[edge]]
+src = "pdf"
+dst = "docx"
+adapter = "pdf2docx"
+quality = "best_effort"
+cost = 6
+label = "DOCX (Word document)"
+
