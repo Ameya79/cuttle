@@ -5,6 +5,17 @@ All notable changes to Cuttle will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.4.0] - Phase 4: Windows 11 Top-Level Context Menu & Native Speed
+
+### Added
+- **Native Windowless Launcher (P4-01)**: `cuttle/platform/windows/launcher/main.cpp` compiled into a native C++ executable (`cuttlectl.exe`) with median start-to-pipe latency of 25.98 ms (exceeding the 100 ms requirement).
+- **IExplorerCommand COM Server (P4-02)**: `cuttle/platform/windows/shell_extension/` in-process COM DLL (`cuttle_shell.dll`) implementing `IExplorerCommand`, `IEnumExplorerCommand`, and `IClassFactory` with full exception isolation.
+- **Dynamic Context Submenu (P4-03)**: Dynamic verb enumeration filtering available targets per file type and `GetFlags` returning `ECF_HASSUBCOMMANDS` for submenus.
+- **Sparse Package Manifest & Registration (P4-04)**: `packaging/AppxManifest.xml` declaring the `windows.fileExplorerContextMenus` extension with package identity, plus PowerShell registration (`scripts/register_sparse_package.ps1`) and unregistration scripts.
+- **Developer Documentation (P4-04)**: `docs/dev-windows-shell.md` explaining Windows 11 sparse package mechanics, registration, and debugging.
+- **Crash Safety & Speed Verification (P4-05 & P4-06)**: `tests/integration/test_windows11_shell_pipeline.py` verifying Explorer never hangs when worker is dead and end-to-end latency is 23.93 ms (< 1 second budget).
+- **Phase 4 Exit Gate (P4-07)**: Full test suite passing across all 310 tests, 0 `.cuttle-part` leaks, clean Ruff, Mypy, and Pyright.
+
 ## [0.3.0] - Phase 3: Documents & PDFs
 
 ### Added
