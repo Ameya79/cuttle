@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cuttle — Offline Windows Right-Click File Converter</title>
+  <meta name="description" content="Right-click any file and convert instantly in Windows 10 &amp; 11. 100% offline, zero cloud uploads, fast, private, and open-source under GPL-3.0.">
+  <meta name="keywords" content="file converter, windows 11 context menu, offline converter, pdf to docx, ffmpeg, pandoc, privacy">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="bg-glow bg-glow-1"></div>
+  <div class="bg-glow bg-glow-2"></div>
+
+  <!-- Navigation -->
+  <header class="navbar" id="navbar">
+    <div class="nav-container">
+      <a href="#" class="brand">
+        <span class="brand-icon">🦑</span>
+        <span class="brand-name">Cuttle</span>
+        <span class="brand-tag">v1.0.0</span>
+      </a>
+      <nav class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#formats">Formats</a>
+        <a href="#install">Install</a>
+        <a href="https://github.com/Ameya79/cuttle/blob/main/docs/quality.md" target="_blank" rel="noopener">Quality Matrix</a>
+        <a href="https://github.com/Ameya79/cuttle" target="_blank" rel="noopener" class="nav-gh">GitHub ★</a>
+      </nav>
+      <div class="nav-cta">
+        <a href="https://github.com/Ameya79/cuttle/releases/latest/download/cuttle-setup-x64.exe" class="btn btn-sm btn-primary">
+          Download Installer
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Hero Section -->
+    <section class="hero" id="hero">
+      <div class="hero-container">
+        <div class="hero-badge">
+          <span class="badge-dot"></span>
+          <span>100% Offline • Zero Telemetry • GPL-3.0 Open Source</span>
+        </div>
+        <h1 class="hero-title">Right-Click Any File.<br><span class="gradient-text">Convert Instantly.</span></h1>
+        <p class="hero-subhead">
+          The offline Windows converter that lives right in your context menu.
+          Zero cloud uploads, no queues, no file size limits. Powered by battle-tested open-source engines.
+        </p>
+
+        <div class="hero-actions">
+          <a id="btn-download-installer" href="https://github.com/Ameya79/cuttle/releases/latest/download/cuttle-setup-x64.exe" class="btn btn-lg btn-primary">
+            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download for Windows (x64)
+          </a>
+          <a id="btn-download-portable" href="https://github.com/Ameya79/cuttle/releases/latest/download/cuttle-portable-x64.zip" class="btn btn-lg btn-secondary">
+            Portable .zip
+          </a>
+        </div>
+
+        <div class="cli-quick-install">
+          <span class="cli-label">Or install via winget:</span>
+          <div class="code-pill">
+            <code>winget install Ameya79.Cuttle</code>
+            <button class="copy-btn" data-clipboard="winget install Ameya79.Cuttle" title="Copy command">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Interactive Context Menu Demo Widget -->
+        <div class="demo-card" id="demo-section">
+          <div class="demo-header">
+            <div class="window-dots">
+              <span class="dot dot-red"></span>
+              <span class="dot dot-yellow"></span>
+              <span class="dot dot-green"></span>
+            </div>
+            <div class="window-title">File Explorer — Windows 11 Native Integration</div>
+          </div>
+          <div class="demo-body">
+            <div class="file-item active">
+              <div class="file-icon">📄</div>
+              <div class="file-info">
+                <div class="file-name">financial_report_2026.pdf</div>
+                <div class="file-meta">Portable Document Format • 4.2 MB</div>
+              </div>
+            </div>
+
+            <!-- Context Menu Mockup -->
+            <div class="mock-context-menu">
+              <div class="menu-item"><span class="menu-glyph">📂</span> Open</div>
+              <div class="menu-item"><span class="menu-glyph">🖨️</span> Print</div>
+              <div class="menu-separator"></div>
+              <div class="menu-item menu-cuttle highlight">
+                <span class="menu-glyph">🦑</span>
+                <span class="menu-text">Convert with Cuttle</span>
+                <span class="menu-arrow">›</span>
+
+                <!-- Submenu -->
+                <div class="mock-submenu">
+                  <div class="submenu-item" data-target="DOCX">
+                    <span class="ext-badge ext-word">DOCX</span>
+                    <span>Microsoft Word (.docx)</span>
+                    <span class="tier-tag">Best Effort</span>
+                  </div>
+                  <div class="submenu-item" data-target="PNG">
+                    <span class="ext-badge ext-img">PNG</span>
+                    <span>Page Images (.png)</span>
+                    <span class="tier-tag tier-lossless">Lossless</span>
+                  </div>
+                  <div class="submenu-item" data-target="TXT">
+                    <span class="ext-badge ext-txt">TXT</span>
+                    <span>Plain Text (.txt)</span>
+                    <span class="tier-tag">Fast</span>
+                  </div>
+                </div>
+              </div>
+              <div class="menu-separator"></div>
+              <div class="menu-item"><span class="menu-glyph">📋</span> Copy</div>
+              <div class="menu-item"><span class="menu-glyph">🗑️</span> Delete</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Privacy & Security Guarantee -->
+    <section class="privacy-banner" id="privacy">
+      <div class="container">
+        <div class="privacy-box">
+          <div class="privacy-icon-col">
+            <div class="shield-circle">🛡️</div>
+          </div>
+          <div class="privacy-content">
+            <h2>Your files never leave your PC. Guaranteed.</h2>
+            <p>
+              Unlike online converters that transmit your private PDFs, confidential financial statements, or personal photos to remote cloud servers, Cuttle performs all computations 100% locally on your CPU.
+            </p>
+            <div class="privacy-pillars">
+              <div class="pillar">
+                <span class="pillar-check">✓</span>
+                <div>
+                  <strong>Zero Network Calls</strong>
+                  <p>The conversion engine has no network sockets or telemetry code.</p>
+                </div>
+              </div>
+              <div class="pillar">
+                <span class="pillar-check">✓</span>
+                <div>
+                  <strong>Sandboxed Execution</strong>
+                  <p>Every worker process runs inside Windows Job Objects with strict RAM &amp; CPU limits.</p>
+                </div>
+              </div>
+              <div class="pillar">
+                <span class="pillar-check">✓</span>
+                <div>
+                  <strong>Auditable GPL-3.0</strong>
+                  <p>Every line of code is open source and verifiable on GitHub.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Grid -->
+    <section class="features" id="features">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-tag">ENGINEERED FOR SPEED</span>
+          <h2>Everything you need. Nothing you don't.</h2>
+          <p>Built exclusively for Windows with native OS integration and rock-solid stability.</p>
+        </div>
+
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon">⚡</div>
+            <h3>Windows 11 Native Menu</h3>
+            <p>Direct top-level Windows 11 context menu integration using Sparse Package registration and Windows Explorer COM verbs.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">🧩</div>
+            <h3>Graph-Based Planning</h3>
+            <p>Dijkstra multi-step conversion routing automatically connects intermediate formats when direct paths are unavailable.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">🛡️</div>
+            <h3>Atomic Safe Writes</h3>
+            <p>Conversions write to temporary <code>.cuttle-part</code> files first. Your source files are never overwritten or altered.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">📑</div>
+            <h3>PDF to Word &amp; OCR</h3>
+            <p>Converts PDFs directly into editable Word DOCX documents with layout preservation and optional OCR for scanned pages.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">🎬</div>
+            <h3>Modern Media Engine</h3>
+            <p>Powered by vendored FFmpeg for blazing-fast H.264/HEVC/AV1 video, lossless audio, and animated GIF/WEBP transformations.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">📐</div>
+            <h3>CAD &amp; Technical Formats</h3>
+            <p>Detects LibreDWG and ODA File Converter to bridge AutoCAD DWG/DXF drawings to PDF and vector graphics.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Format Explorer -->
+    <section class="formats" id="formats">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-tag">SUPPORTED CONVERSIONS</span>
+          <h2>Convert between 50+ formats seamlessly</h2>
+          <p>Explore common conversion paths supported out of the box.</p>
+        </div>
+
+        <div class="format-tabs" id="format-tabs">
+          <button class="tab-btn active" data-filter="all">All Formats</button>
+          <button class="tab-btn" data-filter="documents">Documents</button>
+          <button class="tab-btn" data-filter="images">Images</button>
+          <button class="tab-btn" data-filter="video">Audio &amp; Video</button>
+          <button class="tab-btn" data-filter="cad">CAD &amp; Vector</button>
+        </div>
+
+        <div class="format-grid" id="format-grid">
+          <div class="format-card" data-cat="documents">
+            <div class="format-badge-row">
+              <span class="ext-tag">PDF</span> <span class="arrow-tag">➔</span> <span class="ext-tag">DOCX</span>
+            </div>
+            <h4>PDF to Word Document</h4>
+            <p>Extracts editable paragraphs, tables, and typography.</p>
+            <span class="card-tier">Best Effort</span>
+          </div>
+          <div class="format-card" data-cat="documents">
+            <div class="format-badge-row">
+              <span class="ext-tag">DOCX</span> <span class="arrow-tag">➔</span> <span class="ext-tag">PDF</span>
+            </div>
+            <h4>Word to PDF</h4>
+            <p>High-fidelity PDF document rendering via Pandoc or LibreOffice.</p>
+            <span class="card-tier tier-lossless">Lossless</span>
+          </div>
+          <div class="format-card" data-cat="images">
+            <div class="format-badge-row">
+              <span class="ext-tag">HEIC</span> <span class="arrow-tag">➔</span> <span class="ext-tag">JPEG</span>
+            </div>
+            <h4>iPhone HEIC to JPEG</h4>
+            <p>Instant batch conversion of iOS HEIC photos with EXIF retention.</p>
+            <span class="card-tier tier-lossless">Perceptual</span>
+          </div>
+          <div class="format-card" data-cat="images">
+            <div class="format-badge-row">
+              <span class="ext-tag">PNG</span> <span class="arrow-tag">➔</span> <span class="ext-tag">WEBP</span>
+            </div>
+            <h4>Modern WebP Compression</h4>
+            <p>Shrinks web images up to 80% with alpha channel preservation.</p>
+            <span class="card-tier tier-lossless">Lossless</span>
+          </div>
+          <div class="format-card" data-cat="video">
+            <div class="format-badge-row">
+              <span class="ext-tag">MOV</span> <span class="arrow-tag">➔</span> <span class="ext-tag">MP4</span>
+            </div>
+            <h4>Apple QuickTime to MP4</h4>
+            <p>Fast stream re-encoding into universally compatible H.264 video.</p>
+            <span class="card-tier">Hardware Fast</span>
+          </div>
+          <div class="format-card" data-cat="video">
+            <div class="format-badge-row">
+              <span class="ext-tag">MP4</span> <span class="arrow-tag">➔</span> <span class="ext-tag">GIF</span>
+            </div>
+            <h4>Video Clip to Animated GIF</h4>
+            <p>Generates high-quality animated GIFs with optimized palette generation.</p>
+            <span class="card-tier">Optimized</span>
+          </div>
+          <div class="format-card" data-cat="cad">
+            <div class="format-badge-row">
+              <span class="ext-tag">DWG</span> <span class="arrow-tag">➔</span> <span class="ext-tag">PDF</span>
+            </div>
+            <h4>AutoCAD DWG to Vector PDF</h4>
+            <p>Bridges engineering drawings via LibreDWG and LibreOffice Draw.</p>
+            <span class="card-tier">Add-on Powered</span>
+          </div>
+          <div class="format-card" data-cat="documents">
+            <div class="format-badge-row">
+              <span class="ext-tag">MD</span> <span class="arrow-tag">➔</span> <span class="ext-tag">HTML</span>
+            </div>
+            <h4>Markdown to Styled HTML</h4>
+            <p>Converts GitHub-flavored markdown into standalone HTML documents.</p>
+            <span class="card-tier tier-lossless">Lossless</span>
+          </div>
+        </div>
+
+        <div class="matrix-link-box">
+          <p>Want full benchmark details on typography, formatting, and speeds?</p>
+          <a href="https://github.com/Ameya79/cuttle/blob/main/docs/quality.md" target="_blank" rel="noopener" class="btn btn-outline">
+            View Complete Conversion Quality Matrix ➔
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Installation & Package Managers -->
+    <section class="install" id="install">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-tag">GET CUTTLE</span>
+          <h2>Install in seconds on Windows</h2>
+          <p>Choose your preferred installer or command-line package manager.</p>
+        </div>
+
+        <div class="install-grid">
+          <!-- Standalone Download -->
+          <div class="install-card">
+            <div class="card-top">
+              <span class="card-badge">RECOMMENDED</span>
+              <h3>Official Installer</h3>
+              <p>Standard Inno Setup installer with automatic Windows 11 shell integration and uninstaller support.</p>
+            </div>
+            <div class="card-bottom">
+              <a href="https://github.com/Ameya79/cuttle/releases/latest/download/cuttle-setup-x64.exe" class="btn btn-primary btn-block">
+                Download cuttle-setup-x64.exe
+              </a>
+              <span class="sub-link">Or grab the <a href="https://github.com/Ameya79/cuttle/releases/latest/download/cuttle-portable-x64.zip">Portable .zip</a></span>
+            </div>
+          </div>
+
+          <!-- Package Managers -->
+          <div class="install-card">
+            <div class="card-top">
+              <span class="card-badge">PACKAGE MANAGERS</span>
+              <h3>Command-Line Installation</h3>
+              <p>Install and update effortlessly with your favorite Windows package tool.</p>
+            </div>
+            <div class="pkg-manager-tabs">
+              <button class="pkg-tab active" data-pkg="winget">Winget</button>
+              <button class="pkg-tab" data-pkg="scoop">Scoop</button>
+              <button class="pkg-tab" data-pkg="choco">Chocolatey</button>
+            </div>
+            <div class="pkg-code-container">
+              <pre><code id="pkg-command-text">winget install Ameya79.Cuttle</code></pre>
+              <button class="copy-btn" id="pkg-copy-btn" title="Copy command">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Integrity Verification -->
+        <div class="integrity-card">
+          <h4>Checksum &amp; Integrity Verification</h4>
+          <p>Every release publishes SHA-256 hashes in <code>SHA256SUMS.txt</code> signed with Authenticode. Verify in PowerShell:</p>
+          <div class="code-pill code-pill-block">
+            <code>Get-FileHash -Algorithm SHA256 .\cuttle-setup-x64.exe</code>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container footer-content">
+      <div class="footer-left">
+        <div class="brand">
+          <span class="brand-icon">🦑</span>
+          <span class="brand-name">Cuttle</span>
+        </div>
+        <p>Offline, private, right-click file converter for Windows 10 and 11.</p>
+        <p class="copyright">Licensed under the <a href="https://www.gnu.org/licenses/gpl-3.0.html" target="_blank" rel="noopener">GNU General Public License v3.0</a>.</p>
+      </div>
+      <div class="footer-links">
+        <div class="link-col">
+          <h5>Project</h5>
+          <a href="https://github.com/Ameya79/cuttle" target="_blank" rel="noopener">GitHub Repository</a>
+          <a href="https://github.com/Ameya79/cuttle/releases" target="_blank" rel="noopener">Releases &amp; Changelog</a>
+          <a href="https://github.com/Ameya79/cuttle/issues" target="_blank" rel="noopener">Issue Tracker</a>
+        </div>
+        <div class="link-col">
+          <h5>Documentation</h5>
+          <a href="https://github.com/Ameya79/cuttle/blob/main/docs/quality.md" target="_blank" rel="noopener">Conversion Quality Matrix</a>
+          <a href="https://github.com/Ameya79/cuttle/blob/main/THIRD_PARTY_NOTICES.md" target="_blank" rel="noopener">Third-Party Notices &amp; GPL Offer</a>
+          <a href="https://github.com/Ameya79/cuttle/blob/main/docs/dwg-addon.md" target="_blank" rel="noopener">CAD DWG Setup Guide</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
