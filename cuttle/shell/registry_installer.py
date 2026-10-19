@@ -57,7 +57,13 @@ def get_default_cuttlectl_cmd() -> str:
     if cuttlectl_on_path:
         return f'"{cuttlectl_on_path}"'
 
-    return f'"{sys.executable}" -m cuttle.worker.cuttlectl'
+    py_exec = sys.executable
+    if sys.platform == "win32":
+        candidate_pythonw = Path(sys.executable).with_name("pythonw.exe")
+        if candidate_pythonw.is_file():
+            py_exec = str(candidate_pythonw)
+
+    return f'"{py_exec}" -m cuttle.worker.cuttlectl'
 
 
 def get_default_manifest_path() -> Path:
@@ -122,10 +128,13 @@ def install_context_menus(config: RegistryConfig | None = None) -> list[str]:
     reg = load_registry()
     graph = ConversionGraph(reg)
 
+    from cuttle.engine.convert import get_available_tools
+
+    avail_tools = get_available_tools()
     created_keys: list[str] = []
 
     for fmt_name, fmt_info in reg.formats.items():
-        targets = graph.list_targets(fmt_name)
+        targets = graph.list_targets(fmt_name, available_tools=avail_tools)
         if not targets:
             continue
 
@@ -138,6 +147,16 @@ def install_context_menus(config: RegistryConfig | None = None) -> list[str]:
             target_verb_path = f"{menu_shell_path}\\{target.fmt}"
             target_command_path = f"{target_verb_path}\\command"
 
+            if target.available:
+                verb_label = f"Convert to {target.label}"
+                cmd_str = f'{cuttlectl} "%1" {target.fmt}'
+            elif target.missing == "libreoffice":
+                verb_label = f"Convert to {target.label} (needs LibreOffice)"
+                cmd_str = f"{cuttlectl} missing-tool libreoffice"
+            else:
+                verb_label = f"Convert to {target.label} (needs {target.missing})"
+                cmd_str = f"{cuttlectl} missing-tool {target.missing}"
+
             # Create verb key
             k_verb = winreg.CreateKey(cfg.root_key, target_verb_path)
             winreg.SetValueEx(
@@ -145,13 +164,12 @@ def install_context_menus(config: RegistryConfig | None = None) -> list[str]:
                 "MUIVerb",
                 0,
                 winreg.REG_SZ,
-                f"Convert to {target.label}",
+                verb_label,
             )
             winreg.CloseKey(k_verb)
 
             # Create command key
             k_cmd = winreg.CreateKey(cfg.root_key, target_command_path)
-            cmd_str = f'{cuttlectl} "%1" {target.fmt}'
             winreg.SetValueEx(k_cmd, "", 0, winreg.REG_SZ, cmd_str)
             winreg.CloseKey(k_cmd)
 

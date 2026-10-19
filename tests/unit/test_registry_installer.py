@@ -149,3 +149,40 @@ def test_idempotent_install_in_sandbox(tmp_path: Path) -> None:
 
     deleted = uninstall_context_menus(cfg)
     assert deleted == len(created2)
+
+
+def test_missing_libreoffice_menu_verb(tmp_path: Path) -> None:
+    if sys.platform != "win32":
+        pytest.skip("Registry context menus are Windows only")
+
+    import winreg
+    from unittest.mock import patch
+
+    manifest = tmp_path / "installed_keys.json"
+    cfg = RegistryConfig(
+        base_path=SANDBOX_BASE,
+        cuttlectl_cmd=r'"C:\Program Files\Cuttle\cuttlectl.exe"',
+        icon_path=None,
+        manifest_path=manifest,
+    )
+
+    with patch("cuttle.engine.convert.is_tool_available", side_effect=lambda t: t != "libreoffice"):
+        install_context_menus(cfg)
+
+    # DOCX -> PDF requires libreoffice; should have (needs LibreOffice) label
+    pdf_verb_path = f"{SANDBOX_BASE}\\Cuttle.menu.docx\\shell\\pdf"
+    k_verb = winreg.OpenKey(winreg.HKEY_CURRENT_USER, pdf_verb_path)
+    try:
+        mui, _ = winreg.QueryValueEx(k_verb, "MUIVerb")
+        assert "needs LibreOffice" in mui
+    finally:
+        winreg.CloseKey(k_verb)
+
+    # Command should point to missing-tool
+    pdf_cmd_path = f"{pdf_verb_path}\\command"
+    k_cmd = winreg.OpenKey(winreg.HKEY_CURRENT_USER, pdf_cmd_path)
+    try:
+        cmd_str, _ = winreg.QueryValueEx(k_cmd, "")
+        assert "missing-tool libreoffice" in cmd_str
+    finally:
+        winreg.CloseKey(k_cmd)
