@@ -86,6 +86,14 @@ class CuttleWorkerDaemon:
         self.server.start()
         logger.info("Pipe server listening on %s", self.server.pipe_name)
 
+        # Trigger background update check (with cooldown cache)
+        try:
+            from cuttle.worker.updater import start_background_update_check
+
+            start_background_update_check(delay_s=2.0)
+        except Exception as exc:
+            logger.debug("Failed to start background update checker: %s", exc)
+
         def _handle_signal(sig: int, frame: Any) -> None:
             self.stop()
 

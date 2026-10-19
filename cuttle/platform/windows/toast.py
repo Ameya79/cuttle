@@ -154,6 +154,26 @@ class ToastNotifier:
         toast.on_activated = _on_activated
         return toast
 
+    def create_update_toast(self, version: str, download_url: str) -> Any:
+        """Construct the update notification Toast object."""
+        import webbrowser
+
+        from windows_toasts import Toast, ToastButton
+
+        title = "Cuttle: Update Available"
+        body = f"Version {version} is now available. Click to view release."
+        toast = Toast([title, body])
+
+        toast.AddAction(ToastButton("Download", arguments="download"))
+
+        def _on_activated(args: Any) -> None:
+            arg = getattr(args, "arguments", "")
+            if arg == "download":
+                webbrowser.open(download_url)
+
+        toast.on_activated = _on_activated
+        return toast
+
     def notify_success(self, output_path: Path | str, original_filename: str | None = None) -> bool:
         """Display a native success toast notification.
 
@@ -194,6 +214,22 @@ class ToastNotifier:
             logger.warning("Failed to display error toast: %s", exc)
             return False
 
+    def notify_update(self, version: str, download_url: str) -> bool:
+        """Display a native update notification toast.
+
+        Returns True if dispatched to Windows, False if failed/disabled.
+        """
+        if self._toaster is None:
+            return False
+
+        try:
+            toast = self.create_update_toast(version, download_url)
+            self._toaster.show_toast(toast)
+            return True
+        except Exception as exc:
+            logger.warning("Failed to display update toast: %s", exc)
+            return False
+
 
 # Singleton instance and module helpers
 _default_notifier: ToastNotifier | None = None
@@ -219,3 +255,8 @@ def notify_error(
 ) -> bool:
     """Convenience helper to display an error toast via default notifier."""
     return get_notifier().notify_error(error_message, filename, detail)
+
+
+def notify_update(version: str, download_url: str) -> bool:
+    """Convenience helper to display an update notification toast via default notifier."""
+    return get_notifier().notify_update(version, download_url)
