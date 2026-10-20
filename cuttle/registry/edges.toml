@@ -551,7 +551,7 @@ cost = 2
 label = "HTML web page"
 requires = ["pandoc"]
 
-# --- Office Documents to PDF via LibreOffice (Phase 3) ---
+# --- Office Documents to PDF (Phase 3 & Phase 5) ---
 
 [[edge]]
 src = "docx"

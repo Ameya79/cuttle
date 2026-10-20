@@ -41,8 +41,14 @@ def is_tool_available(tool_name: str) -> bool:
     """Check whether a CLI tool binary exists in vendor/, system PATH, or registry."""
     if tool_name == "libreoffice":
         from cuttle.platform.windows.office_detect import detect_office
+        from cuttle.platform.windows.word_detect import detect_word
 
-        return detect_office().installed
+        return detect_office().installed or detect_word().installed
+
+    if tool_name == "microsoft_word":
+        from cuttle.platform.windows.word_detect import detect_word
+
+        return detect_word().installed
 
     if tool_name == "dwg_addon":
         from cuttle.adapters.dwg import get_available_dwg_tool
@@ -61,7 +67,7 @@ def is_tool_available(tool_name: str) -> bool:
 
 def get_available_tools() -> set[str]:
     """Return set of external tool names currently available."""
-    known = ["ffmpeg", "ffprobe", "pandoc", "libreoffice", "dwg_addon"]
+    known = ["ffmpeg", "ffprobe", "pandoc", "libreoffice", "microsoft_word", "dwg_addon"]
     return {t for t in known if is_tool_available(t)}
 
 
@@ -103,6 +109,10 @@ def get_adapter(adapter_name: str) -> BaseAdapter:
         return PandocAdapter()
     if adapter_name == "libreoffice":
         return LibreOfficeAdapter()
+    if adapter_name == "word":
+        from cuttle.adapters.word import WordAdapter
+
+        return WordAdapter()
     if adapter_name == "pdf2docx":
         from cuttle.adapters.pdf2docx_adapter import Pdf2DocxAdapter
 

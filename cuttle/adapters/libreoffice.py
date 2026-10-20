@@ -119,6 +119,24 @@ class LibreOfficeAdapter(BaseAdapter):
         src = Path(plan.args[0])
         tmp_out = Path(plan.args[1])
 
+        # For DOCX files on Windows, prioritize native Microsoft Word COM automation
+        # to ensure 100% pixel-perfect layout and exact font fidelity without substitution.
+        if src.suffix.lower() == ".docx":
+            try:
+                from cuttle.platform.windows.word_detect import detect_word
+
+                if detect_word().installed:
+                    from cuttle.adapters.word import WordAdapter
+
+                    word_adapter = WordAdapter()
+                    word_plan = word_adapter.plan(src, "pdf", tmp_out, {})
+                    word_adapter.run(word_plan, on_progress, cancel)
+                    return
+            except Exception as exc:
+                if isinstance(exc, CuttleError) and exc.code == "E_CANCELLED":
+                    raise
+                # Fall back to LibreOffice if Word execution fails
+
         # Enforce single concurrency
         on_progress(None, "Waiting for LibreOffice queue...")
         with _LIBREOFFICE_LOCK:
