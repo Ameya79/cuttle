@@ -39,6 +39,7 @@ def find_iscc() -> str | None:
         return found
 
     candidates = [
+        Path(os.environ.get("LOCALAPPDATA", "")) / "Programs" / "Inno Setup 6" / "ISCC.exe",
         Path(os.environ.get("PROGRAMFILES(X86)", r"C:\Program Files (x86)"))
         / "Inno Setup 6"
         / "iscc.exe",
