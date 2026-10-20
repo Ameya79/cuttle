@@ -13,6 +13,7 @@ from __future__ import annotations
 import json
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 
 from cuttle.adapters.base import BaseAdapter
@@ -29,7 +30,10 @@ from cuttle.engine.types import (
 
 def find_tool(tool_name: str) -> str:
     """Find the path to an external tool in vendor/ or system PATH."""
-    project_root = Path(__file__).resolve().parent.parent.parent
+    if getattr(sys, "frozen", False):
+        project_root = Path(sys.executable).parent
+    else:
+        project_root = Path(__file__).resolve().parent.parent.parent
     vendor_tool = project_root / "vendor" / f"{tool_name}.exe"
     if vendor_tool.is_file():
         return str(vendor_tool)

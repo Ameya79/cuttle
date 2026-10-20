@@ -12,6 +12,7 @@ from __future__ import annotations
 import functools
 import shutil
 import subprocess
+import sys
 import zipfile
 from pathlib import Path
 
@@ -48,7 +49,10 @@ PANDOC_OUTPUT_FORMAT_MAP: dict[str, str] = {
 @functools.lru_cache(maxsize=1)
 def resolve_pandoc_binary() -> str:
     """Resolve the pandoc executable from vendor/ or system PATH."""
-    project_root = Path(__file__).resolve().parent.parent.parent
+    if getattr(sys, "frozen", False):
+        project_root = Path(sys.executable).parent
+    else:
+        project_root = Path(__file__).resolve().parent.parent.parent
     vendor_tool = project_root / "vendor" / "pandoc.exe"
     if vendor_tool.is_file():
         return str(vendor_tool)

@@ -15,6 +15,7 @@ Implements TRD §6.5 steps 1 through 9:
 from __future__ import annotations
 
 import shutil
+import sys
 from pathlib import Path
 
 from cuttle.adapters.base import BaseAdapter
@@ -48,7 +49,10 @@ def is_tool_available(tool_name: str) -> bool:
 
         return get_available_dwg_tool() is not None
 
-    project_root = Path(__file__).resolve().parent.parent.parent
+    if getattr(sys, "frozen", False):
+        project_root = Path(sys.executable).parent
+    else:
+        project_root = Path(__file__).resolve().parent.parent.parent
     vendor_tool = project_root / "vendor" / f"{tool_name}.exe"
     if vendor_tool.is_file():
         return True

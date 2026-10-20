@@ -62,6 +62,16 @@ def build_native_components() -> None:
     subprocess.run([sys.executable, str(shell_script)], check=True)
 
 
+def build_pyinstaller() -> None:
+    """Compile Python executables into dist/Cuttle/ via PyInstaller."""
+    print("--> Step 3: Compiling Python executables with PyInstaller...")
+    spec_file = ROOT_DIR / "packaging" / "cuttle.spec"
+    subprocess.run(
+        [sys.executable, "-m", "PyInstaller", "--noconfirm", str(spec_file)],
+        check=True,
+    )
+
+
 def stage_distribution_folder() -> None:
     """Ensure all required runtime files, scripts, and native binaries exist in dist/Cuttle/."""
     APP_DIST_DIR.mkdir(parents=True, exist_ok=True)
@@ -108,6 +118,14 @@ def stage_distribution_folder() -> None:
     assets_dest.mkdir(exist_ok=True)
     for asset in (ROOT_DIR / "assets").glob("*.*"):
         shutil.copy2(asset, assets_dest / asset.name)
+
+    # 6. Vendored tools (ffmpeg, ffprobe, pandoc)
+    vendor_src = ROOT_DIR / "vendor"
+    if vendor_src.is_dir():
+        vendor_dest = APP_DIST_DIR / "vendor"
+        vendor_dest.mkdir(exist_ok=True)
+        for exe_file in vendor_src.glob("*.exe"):
+            shutil.copy2(exe_file, vendor_dest / exe_file.name)
 
 
 def create_portable_zip() -> Path:
@@ -161,6 +179,7 @@ def main() -> None:
     print("========================================")
 
     build_native_components()
+    build_pyinstaller()
     stage_distribution_folder()
     create_portable_zip()
     build_inno_setup_installer()

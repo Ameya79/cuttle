@@ -18,6 +18,7 @@ from __future__ import annotations
 import json
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 
 import filetype
@@ -42,7 +43,10 @@ app = typer.Typer(
 
 def _resolve_binary_info(tool_name: str) -> dict[str, object]:
     """Check binary location and version."""
-    project_root = Path(__file__).resolve().parent.parent
+    if getattr(sys, "frozen", False):
+        project_root = Path(sys.executable).parent
+    else:
+        project_root = Path(__file__).resolve().parent.parent
     vendor_tool = project_root / "vendor" / f"{tool_name}.exe"
 
     target_bin: str | None = None
