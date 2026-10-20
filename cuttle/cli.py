@@ -285,28 +285,79 @@ def doctor_command(
         "pandoc": _resolve_binary_info("pandoc"),
     }
 
+    # Optional add-on tools
+    from cuttle.adapters.dwg import detect_libredwg, detect_oda
+    from cuttle.adapters.ocr import detect_ocrmypdf, detect_tesseract
+    from cuttle.platform.windows.office_detect import detect_office
+
+    office_info = detect_office()
+    tesseract_path = detect_tesseract()
+    ocrmypdf_path = detect_ocrmypdf()
+    libredwg_path = detect_libredwg()
+    oda_path = detect_oda()
+
+    optional_tools: dict[str, dict[str, object]] = {
+        "libreoffice": {
+            "installed": office_info.installed,
+            "path": str(office_info.path) if office_info.path else None,
+            "version": office_info.version or ("Available" if office_info.installed else None),
+        },
+        "tesseract": {
+            "installed": bool(tesseract_path),
+            "path": str(tesseract_path) if tesseract_path else None,
+            "version": "Available" if tesseract_path else None,
+        },
+        "ocrmypdf": {
+            "installed": bool(ocrmypdf_path),
+            "path": str(ocrmypdf_path) if ocrmypdf_path else None,
+            "version": "Available" if ocrmypdf_path else None,
+        },
+        "dwg2dxf": {
+            "installed": bool(libredwg_path),
+            "path": str(libredwg_path) if libredwg_path else None,
+            "version": "Available" if libredwg_path else None,
+        },
+        "oda_converter": {
+            "installed": bool(oda_path),
+            "path": str(oda_path) if oda_path else None,
+            "version": "Available" if oda_path else None,
+        },
+    }
+
+    try:
+        import pdf2docx
+
+        pdf2docx_ver = getattr(pdf2docx, "__version__", "installed")
+    except ImportError:
+        pdf2docx_ver = "not installed"
+
     libraries = {
         "Pillow": {"version": getattr(Image, "__version__", "unknown")},
         "pillow-heif": {"version": getattr(pillow_heif, "__version__", "unknown")},
         "filetype": {"version": getattr(filetype, "__version__", "unknown")},
         "psutil": {"version": getattr(psutil, "__version__", "unknown")},
         "pypdf": {"version": getattr(pypdf, "__version__", "unknown")},
+        "pdf2docx": {"version": pdf2docx_ver},
     }
 
     # Core required tools for Phase 1 are ffmpeg and ffprobe
     phase1_ok = bool(tools["ffmpeg"]["installed"] and tools["ffprobe"]["installed"])
+    core_ready = bool(phase1_ok and tools["pandoc"]["installed"])
 
     if json_mode:
         payload = {
             "status": "ok" if phase1_ok else "incomplete",
             "phase": 1,
+            "release": "1.0.0",
+            "core_ready": core_ready,
             "tools": tools,
+            "optional_tools": optional_tools,
             "libraries": libraries,
         }
         typer.echo(json.dumps(payload))
     else:
         typer.echo("Cuttle Doctor — System Status:")
-        typer.echo("--- External Tools ---")
+        typer.echo("--- Core Bundled Tools ---")
         for name, info in tools.items():
             if info["installed"]:
                 typer.echo(f"  [OK]      {name:10} {info['path']} ({info['version']})")
@@ -314,11 +365,21 @@ def doctor_command(
                 opt_str = " (optional for Phase 1)" if name == "pandoc" else " (REQUIRED)"
                 typer.echo(f"  [MISSING] {name:10}{opt_str}")
 
+        typer.echo("--- Optional Add-On Tools ---")
+        for name, info in optional_tools.items():
+            if info["installed"]:
+                typer.echo(f"  [OK]      {name:12} {info['path']}")
+            else:
+                typer.echo(f"  [OPTIONAL] {name:12} (not installed; add-on feature)")
+
         typer.echo("--- Python Libraries ---")
         for lib, l_info in libraries.items():
             typer.echo(f"  [OK]      {lib:12} version {l_info['version']}")
 
-        if phase1_ok:
+        if core_ready:
+            typer.echo("\nPhase 1 status: READY (all required tools and libraries available)")
+            typer.echo("v1.0.0 Release Status: READY (all core conversion tools available)")
+        elif phase1_ok:
             typer.echo("\nPhase 1 status: READY (all required tools and libraries available)")
         else:
             typer.echo("\nPhase 1 status: INCOMPLETE (missing required tools)", err=True)
