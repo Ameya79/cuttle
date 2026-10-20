@@ -262,7 +262,8 @@ class ImagePdfAdapter(BaseAdapter):
 
     def validate(self, src: Path, out: Path) -> ValidationResult:
         """Validate converted image or PDF file."""
-        if out.suffix.lower() == ".pdf":
+        clean_name = out.name.removesuffix(".cuttle-part").lower()
+        if clean_name.endswith(".pdf") or (src.suffix.lower() != ".pdf"):
             return validate_pdf(out)
 
         # Validate image file

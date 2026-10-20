@@ -90,6 +90,17 @@ def generate_images(out_dir: Path) -> dict[str, Path]:
         heic_path.write_bytes(b"\x00\x00\x00\x18ftypheic\x00\x00\x00\x00mif1heic" + b"\x00" * 200)
     created["heic"] = heic_path
 
+    # 8. cmyk.jpg: 100x100 CMYK image
+    cmyk_jpg_path = out_dir / "cmyk.jpg"
+    im_cmyk = Image.new("CMYK", (100, 100), color=(100, 50, 0, 20))
+    im_cmyk.save(cmyk_jpg_path, format="JPEG")
+    created["cmyk_jpg"] = cmyk_jpg_path
+
+    # 9. cmyk.tiff: 100x100 CMYK image
+    cmyk_tiff_path = out_dir / "cmyk.tiff"
+    im_cmyk.save(cmyk_tiff_path, format="TIFF")
+    created["cmyk_tiff"] = cmyk_tiff_path
+
     return created
 
 
@@ -181,7 +192,30 @@ def generate_audio_video(out_dir: Path, ffmpeg_bin: str) -> dict[str, Path]:
         str(audio_mp3_path),
     ]
     subprocess.run(cmd_mp3, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    created["audio_mp3"] = audio_mp3_path
+    # 5. odd_dimensions.avi (321x247 odd dimensions video + audio)
+    odd_dim_path = out_dir / "odd_dimensions.avi"
+    cmd_odd = [
+        ffmpeg_bin,
+        "-hide_banner",
+        "-nostdin",
+        "-y",
+        "-f",
+        "lavfi",
+        "-i",
+        "testsrc=duration=2:size=321x247:rate=24",
+        "-f",
+        "lavfi",
+        "-i",
+        "sine=frequency=440:duration=2",
+        "-c:v",
+        "mjpeg",
+        "-c:a",
+        "mp3",
+        "-shortest",
+        str(odd_dim_path),
+    ]
+    subprocess.run(cmd_odd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    created["odd_dimensions"] = odd_dim_path
 
     return created
 
@@ -340,6 +374,62 @@ def generate_documents(out_dir: Path) -> dict[str, Path]:
     with open(locked_pdf_path, "wb") as f:
         enc_writer.write(f)
     created["locked_pdf"] = locked_pdf_path
+
+    # 8. complex_layout.pdf
+    complex_pdf_path = out_dir / "complex_layout.pdf"
+    import fitz
+
+    cdoc = fitz.open()
+    cpage = cdoc.new_page(width=595, height=842)
+    cpage.insert_textbox(
+        fitz.Rect(50, 50, 280, 250),
+        "Column One Title\nThis is paragraph 1 in column 1.\nOffline converter tests.",
+    )
+    cpage.insert_textbox(
+        fitz.Rect(300, 50, 540, 250),
+        "Column Two Title\nThis is paragraph 2 in column 2.\nSecondary text block.",
+    )
+    cpage.draw_rect(fitz.Rect(50, 280, 540, 420))
+    cpage.draw_line(fitz.Point(50, 330), fitz.Point(540, 330))
+    cpage.draw_line(fitz.Point(200, 280), fitz.Point(200, 420))
+    cpage.draw_line(fitz.Point(370, 280), fitz.Point(370, 420))
+    cpage.insert_text(fitz.Point(60, 310), "Metric")
+    cpage.insert_text(fitz.Point(210, 310), "Target")
+    cpage.insert_text(fitz.Point(380, 310), "Status")
+    cpage.insert_text(fitz.Point(60, 370), "Accuracy")
+    cpage.insert_text(fitz.Point(210, 370), "100%")
+    cpage.insert_text(fitz.Point(380, 370), "Pass")
+    cdoc.save(complex_pdf_path)
+    cdoc.close()
+    created["complex_layout_pdf"] = complex_pdf_path
+
+    # 9. unicode_text.pdf
+    unicode_pdf_path = out_dir / "unicode_text.pdf"
+    udoc = fitz.open()
+    upage = udoc.new_page(width=595, height=842)
+    upage.insert_text(fitz.Point(50, 80), "Multilingual Internationalization Test:")
+    upage.insert_text(
+        fitz.Point(50, 120), "Latin Accents: Cafe, facade, resume, Uber, Strasse, naive."
+    )
+    upage.insert_text(fitz.Point(50, 160), "Symbols: (c) (r) (tm) $ 100% #tag & co.")
+    udoc.save(unicode_pdf_path)
+    udoc.close()
+    created["unicode_text_pdf"] = unicode_pdf_path
+
+    # 10. rotated_pages.pdf
+    rotated_pdf_path = out_dir / "rotated_pages.pdf"
+    rdoc = fitz.open()
+    p1 = rdoc.new_page(width=595, height=842)
+    p1.insert_text(fitz.Point(50, 100), "Page 1 - Normal Orientation 0 deg")
+    p2 = rdoc.new_page(width=595, height=842)
+    p2.insert_text(fitz.Point(50, 100), "Page 2 - Rotated 90 deg")
+    p2.set_rotation(90)
+    p3 = rdoc.new_page(width=595, height=842)
+    p3.insert_text(fitz.Point(50, 100), "Page 3 - Rotated 180 deg")
+    p3.set_rotation(180)
+    rdoc.save(rotated_pdf_path)
+    rdoc.close()
+    created["rotated_pages_pdf"] = rotated_pdf_path
 
     return created
 

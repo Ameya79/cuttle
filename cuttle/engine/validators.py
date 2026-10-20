@@ -30,7 +30,11 @@ def validate_office_document(path: Path, expected_fmt: str | None = None) -> Val
     except OSError as exc:
         return ValidationResult(ok=False, reason=f"Could not access file: {exc}")
 
-    fmt = expected_fmt.lower().lstrip(".") if expected_fmt else path.suffix.lower().lstrip(".")
+    if expected_fmt:
+        fmt = expected_fmt.lower().lstrip(".")
+    else:
+        clean_stem = path.name.removesuffix(".cuttle-part")
+        fmt = Path(clean_stem).suffix.lower().lstrip(".")
 
     try:
         with zipfile.ZipFile(path, "r") as z:
