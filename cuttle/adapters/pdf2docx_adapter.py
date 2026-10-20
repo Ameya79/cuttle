@@ -115,7 +115,7 @@ class Pdf2DocxAdapter(BaseAdapter):
                         detail="Cancelled during PDF to Word conversion.",
                     )
 
-                cv.convert(str(tmp_out))
+                cv.convert(str(tmp_out), delete_end_line_hyphen=True)
                 on_progress(95.0, "Finalizing Word document...")
             finally:
                 cv.close()
