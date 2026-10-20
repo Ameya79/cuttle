@@ -44,10 +44,10 @@ Start-Process -FilePath "regsvr32.exe" -ArgumentList "/s", "`"$DllPath`"" -Wait 
 # 4. Register Sparse Package Identity
 Write-Host "Registering Sparse Package Manifest ($ManifestPath)..."
 try {
-    Add-AppxPackage -Register $ManifestPath -AllowUnsigned -ErrorAction Stop
+    Add-AppxPackage -Path $ManifestPath -Register -ExternalLocation $ProjectRoot -ErrorAction Stop
     Write-Host "[OK] Cuttle sparse package registered successfully!" -ForegroundColor Green
     Write-Host "Right-click any file in Windows 11 File Explorer to see 'Convert with Cuttle' directly on the top-level menu."
 } catch {
-    Write-Warning "Direct registration with -AllowUnsigned reported: $($_.Exception.Message)"
-    Write-Host "Ensure 'Developer Mode' is enabled in Windows Settings -> System -> For developers." -ForegroundColor Yellow
+    Write-Warning "Sparse package registration failed: $($_.Exception.Message)"
+    Write-Host "Note: Windows 11 requires 'Developer Mode' (Settings -> System -> For developers -> Developer Mode: ON) to register unpackaged local Sparse Packages without a production Microsoft store certificate." -ForegroundColor Yellow
 }

@@ -254,6 +254,26 @@ def formats_command(
     raise typer.Exit(code=0)
 
 
+@app.command(name="install-shell")
+def install_shell_command() -> None:
+    """Register File Explorer context menus for all supported formats."""
+    from cuttle.shell.registry_installer import install_context_menus
+
+    keys = install_context_menus()
+    typer.echo(f"Registered {len(keys)} context menu keys.")
+    raise typer.Exit(code=0)
+
+
+@app.command(name="uninstall-shell")
+def uninstall_shell_command() -> None:
+    """Unregister File Explorer context menus."""
+    from cuttle.shell.registry_installer import uninstall_context_menus
+
+    count = uninstall_context_menus()
+    typer.echo(f"Uninstalled {count} context menu keys.")
+    raise typer.Exit(code=0)
+
+
 @app.command(name="doctor")
 def doctor_command(
     json_mode: bool = typer.Option(False, "--json", help="Emit JSON output."),

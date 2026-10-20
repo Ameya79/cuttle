@@ -47,14 +47,23 @@ def ensure_worker_running(
             subprocess, "DETACHED_PROCESS", 0
         )
 
-    project_root = Path(__file__).resolve().parent.parent.parent
-    py_exec = sys.executable
-    if sys.platform == "win32":
-        candidate_pythonw = Path(sys.executable).with_name("pythonw.exe")
-        if candidate_pythonw.is_file():
-            py_exec = str(candidate_pythonw)
+    if getattr(sys, "frozen", False):
+        project_root = Path(sys.executable).parent
+        worker_exe = project_root / "cuttle-worker.exe"
+        cmd = (
+            [str(worker_exe)]
+            if worker_exe.is_file()
+            else [sys.executable, "-m", "cuttle.worker.main"]
+        )
+    else:
+        project_root = Path(__file__).resolve().parent.parent.parent
+        py_exec = sys.executable
+        if sys.platform == "win32":
+            candidate_pythonw = Path(sys.executable).with_name("pythonw.exe")
+            if candidate_pythonw.is_file():
+                py_exec = str(candidate_pythonw)
+        cmd = [py_exec, "-m", "cuttle.worker.main"]
 
-    cmd = [py_exec, "-m", "cuttle.worker.main"]
     if pipe_name:
         cmd.extend(["--pipe", pipe_name])
 

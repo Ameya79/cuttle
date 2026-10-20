@@ -1,23 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Package
-  xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
-  xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
-  xmlns:uap10="http://schemas.microsoft.com/appx/manifest/uap/windows10/10"
-  xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
-  IgnorableNamespaces="uap uap10 rescap">
+<Package 
+    xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+    xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+    xmlns:uap10="http://schemas.microsoft.com/appx/manifest/uap/windows10/10"
+    xmlns:com="http://schemas.microsoft.com/appx/manifest/com/windows10"
+    xmlns:desktop4="http://schemas.microsoft.com/appx/manifest/desktop/windows10/4"
+    xmlns:desktop5="http://schemas.microsoft.com/appx/manifest/desktop/windows10/5"
+    xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+    IgnorableNamespaces="uap uap10 com desktop4 desktop5 rescap">
 
-  <Identity
-    Name="Cuttle.Converter"
-    Publisher="CN=CuttleDev"
-    Version="0.4.0.0"
-    ProcessorArchitecture="x64" />
+  <Identity 
+      Name="Cuttle.Converter" 
+      Publisher="CN=CuttleDev" 
+      Version="1.0.0.0" 
+      ProcessorArchitecture="x64" />
 
   <Properties>
     <DisplayName>Cuttle File Converter</DisplayName>
     <PublisherDisplayName>Cuttle Project</PublisherDisplayName>
     <Logo>assets\cuttle-logo.png</Logo>
     <uap:SupportedUsers>multiple</uap:SupportedUsers>
+    <uap10:AllowExternalContent>true</uap10:AllowExternalContent>
   </Properties>
+
+  <Resources>
+    <Resource Language="en-us" />
+  </Resources>
 
   <Dependencies>
     <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.22000.0" MaxVersionTested="10.0.26100.0" />
@@ -29,27 +37,34 @@
 
   <Applications>
     <Application Id="CuttleApp" Executable="cuttle\platform\windows\launcher\cuttlectl.exe" EntryPoint="Windows.FullTrustApplication">
-      <uap:VisualElements
-        DisplayName="Cuttle File Converter"
-        Description="Offline right-click file converter for Windows"
-        BackgroundColor="transparent"
-        Square150x150Logo="assets\cuttle-logo.png"
-        Square44x44Logo="assets\cuttle-logo.png">
-      </uap:VisualElements>
+      <uap:VisualElements 
+          DisplayName="Cuttle File Converter" 
+          Description="Offline right-click file converter for Windows" 
+          Square150x150Logo="assets\cuttle-logo.png" 
+          Square44x44Logo="assets\cuttle-logo.png" 
+          BackgroundColor="transparent" />
+          
       <Extensions>
-        <!-- Windows 11 Modern Top-Level Context Menu extension -->
-        <uap10:Extension Category="windows.fileExplorerContextMenus">
-          <uap10:FileExplorerContextMenus>
-            <!-- All files -->
-            <uap10:ItemType Type="*">
-              <uap10:Verb Id="CuttleConvertFile" Clsid="F4312356-5D3C-486B-8C92-72188A47559B" />
-            </uap10:ItemType>
-            <!-- Directories and folders -->
-            <uap10:ItemType Type="Directory">
-              <uap10:Verb Id="CuttleConvertFolder" Clsid="F4312356-5D3C-486B-8C92-72188A47559B" />
-            </uap10:ItemType>
-          </uap10:FileExplorerContextMenus>
-        </uap10:Extension>
+        <!-- 1. Register the COM Server handling the command (IExplorerCommand) -->
+        <com:Extension Category="windows.comServer">
+          <com:ComServer>
+            <com:SurrogateServer DisplayName="Cuttle Shell Extension">
+              <com:Class Id="F4312356-5D3C-486B-8C92-72188A47559B" Path="cuttle\platform\windows\shell_extension\cuttle_shell.dll" ThreadingModel="STA" />
+            </com:SurrogateServer>
+          </com:ComServer>
+        </com:Extension>
+
+        <!-- 2. Register the File Explorer Context Menu Integration -->
+        <desktop4:Extension Category="windows.fileExplorerContextMenus">
+          <desktop4:FileExplorerContextMenus>
+            <desktop5:ItemType Type="Directory">
+              <desktop5:Verb Id="CuttleConvertFolder" Clsid="F4312356-5D3C-486B-8C92-72188A47559B" />
+            </desktop5:ItemType>
+            <desktop5:ItemType Type="*">
+              <desktop5:Verb Id="CuttleConvertFile" Clsid="F4312356-5D3C-486B-8C92-72188A47559B" />
+            </desktop5:ItemType>
+          </desktop4:FileExplorerContextMenus>
+        </desktop4:Extension>
       </Extensions>
     </Application>
   </Applications>
