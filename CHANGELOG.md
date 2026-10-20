@@ -5,6 +5,12 @@ All notable changes to Cuttle will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.0.1] - 2026-10-21: High-Fidelity Document Layout Patch
+
+### Added
+- **Native Microsoft Word COM Conversion (P5-02)**: Added native Windows COM automation adapter (`cuttle/adapters/word.py`, `cuttle/platform/windows/word_com.py`, `cuttle/platform/windows/word_detect.py`) for DOCX to PDF conversions. When Microsoft Word is installed on Windows, Cuttle uses Word's native rendering engine to produce 100% pixel-perfect PDFs with exact font metrics, kerning, margins, headers, and footers, falling back gracefully to LibreOffice when Word is absent.
+- **High-Fidelity PDF to Word Layout Engine (P5-02)**: Upgraded `cuttle/adapters/pdf2docx_adapter.py` with PyMuPDF (`fitz`) page geometry probing, tuned line-break and overlap thresholds, enabled extraction of both stream and lattice tables, and added automated OpenXML post-processing to normalize paragraph spacing (`w:spacing w:after`) to eliminate phantom trailing pages and premature text wrapping.
+
 ## [1.0.0] - Phase 6: General Availability Release
 
 ### Added

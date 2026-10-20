@@ -23,7 +23,7 @@ def test_winget_manifest_validity() -> None:
 
     text = winget_file.read_text(encoding="utf-8")
     assert "PackageIdentifier: Ameya79.Cuttle" in text
-    assert "PackageVersion: 1.0.0" in text
+    assert "PackageVersion: 1.0.1" in text
     assert "InstallerType: inno" in text
     assert "Cuttle-Setup-x64.exe" in text
     assert "Scope: user" in text
@@ -35,7 +35,7 @@ def test_scoop_manifest_validity() -> None:
     assert scoop_file.is_file()
 
     data = json.loads(scoop_file.read_text(encoding="utf-8"))
-    assert data["version"] == "1.0.0"
+    assert data["version"] == "1.0.1"
     assert data["license"] == "GPL-3.0-only"
     assert "cuttle.exe" in data["bin"]
     assert "cuttlectl.exe" in data["bin"]
@@ -57,7 +57,7 @@ def test_chocolatey_manifest_validity() -> None:
     assert id_elem is not None and id_elem.text == "cuttle"
 
     version_elem = root.find(".//{*}version")
-    assert version_elem is not None and version_elem.text == "1.0.0"
+    assert version_elem is not None and version_elem.text == "1.0.1"
 
     install_ps1 = PROJECT_ROOT / "packaging" / "chocolatey" / "tools" / "chocolateyinstall.ps1"
     uninstall_ps1 = PROJECT_ROOT / "packaging" / "chocolatey" / "tools" / "chocolateyuninstall.ps1"

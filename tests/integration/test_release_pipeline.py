@@ -21,14 +21,14 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 
 
 def test_version_consistency_across_metadata() -> None:
-    """Version 1.0.0 must be consistent across pyproject.toml, __init__.py, and changelog."""
-    assert cuttle.__version__ == "1.0.0"
+    """Version 1.0.1 must be consistent across pyproject.toml, __init__.py, and changelog."""
+    assert cuttle.__version__ == "1.0.1"
 
     pyproject_text = (PROJECT_ROOT / "pyproject.toml").read_text(encoding="utf-8")
-    assert 'version = "1.0.0"' in pyproject_text
+    assert 'version = "1.0.1"' in pyproject_text
 
     changelog_text = (PROJECT_ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
-    assert "## [1.0.0] - Phase 6: General Availability Release" in changelog_text
+    assert "## [1.0.1] - 2026-10-21: High-Fidelity Document Layout Patch" in changelog_text
 
 
 def test_packaging_assets_and_scripts() -> None:
@@ -57,17 +57,17 @@ def test_packaging_assets_and_scripts() -> None:
 
 
 def test_package_manager_manifests() -> None:
-    """Winget, Scoop, and Chocolatey manifests must exist and reference version 1.0.0."""
+    """Winget, Scoop, and Chocolatey manifests must exist and reference version 1.0.1."""
     winget = (PROJECT_ROOT / "packaging" / "winget" / "cuttle.yaml").read_text(encoding="utf-8")
-    assert "PackageVersion: 1.0.0" in winget
+    assert "PackageVersion: 1.0.1" in winget
 
     scoop = (PROJECT_ROOT / "packaging" / "scoop" / "cuttle.json").read_text(encoding="utf-8")
-    assert '"version": "1.0.0"' in scoop
+    assert '"version": "1.0.1"' in scoop
 
     choco = (PROJECT_ROOT / "packaging" / "chocolatey" / "cuttle.nuspec").read_text(
         encoding="utf-8"
     )
-    assert "<version>1.0.0</version>" in choco
+    assert "<version>1.0.1</version>" in choco
 
 
 def test_third_party_notices_and_gpl_offer() -> None:

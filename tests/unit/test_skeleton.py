@@ -6,7 +6,7 @@ from cuttle import __version__
 def test_version_exists() -> None:
     """The package exposes a version string."""
     assert isinstance(__version__, str)
-    assert __version__ == "1.0.0"
+    assert __version__ == "1.0.1"
 
 
 def test_cli_entry_point_imports() -> None:

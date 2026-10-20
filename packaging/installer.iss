@@ -3,7 +3,7 @@
 ; Build with: iscc packaging/installer.iss
 
 #define MyAppName "Cuttle"
-#define MyAppVersion "1.0.0"
+#define MyAppVersion "1.0.1"
 #define MyAppPublisher "Cuttle Contributors"
 #define MyAppURL "https://github.com/Ameya79/cuttle"
 #define MyAppExeName "cuttlectl.exe"

@@ -348,7 +348,7 @@ def doctor_command(
         payload = {
             "status": "ok" if phase1_ok else "incomplete",
             "phase": 1,
-            "release": "1.0.0",
+            "release": "1.0.1",
             "core_ready": core_ready,
             "tools": tools,
             "optional_tools": optional_tools,
@@ -378,7 +378,7 @@ def doctor_command(
 
         if core_ready:
             typer.echo("\nPhase 1 status: READY (all required tools and libraries available)")
-            typer.echo("v1.0.0 Release Status: READY (all core conversion tools available)")
+            typer.echo("v1.0.1 Release Status: READY (all core conversion tools available)")
         elif phase1_ok:
             typer.echo("\nPhase 1 status: READY (all required tools and libraries available)")
         else:

@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
   <metadata>
     <id>cuttle</id>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <packageSourceUrl>https://github.com/Ameya79/cuttle/tree/main/packaging/chocolatey</packageSourceUrl>
     <owners>Vinay</owners>
     <title>Cuttle</title>
@@ -22,7 +22,7 @@
       100% offline, privacy-first, free and open source. Converts video, audio, images,
       office documents, PDFs, scanned OCR documents, and CAD drawings without cloud servers.
     </description>
-    <releaseNotes>https://github.com/Ameya79/cuttle/releases/tag/v1.0.0</releaseNotes>
+    <releaseNotes>https://github.com/Ameya79/cuttle/releases/tag/v1.0.1</releaseNotes>
   </metadata>
   <files>
     <file src="tools\**" target="tools" />
