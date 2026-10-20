@@ -16,7 +16,9 @@ block_cipher = None
 
 ROOT_DIR = Path(SPECPATH).resolve().parent
 
-# Data files: formats.toml, edges.toml, assets, AppxManifest
+from PyInstaller.utils.hooks import collect_data_files
+
+# Data files: formats.toml, edges.toml, assets, AppxManifest, and library models/templates
 datas = [
     (str(ROOT_DIR / "cuttle" / "registry" / "*.toml"), "cuttle/registry"),
     (str(ROOT_DIR / "assets" / "*.*"), "assets"),
@@ -24,6 +26,8 @@ datas = [
     (str(ROOT_DIR / "scripts" / "register_sparse_package.ps1"), "scripts"),
     (str(ROOT_DIR / "scripts" / "unregister_sparse_package.ps1"), "scripts"),
 ]
+datas += collect_data_files("pymupdf")
+datas += collect_data_files("docx")
 icon_path = str(ROOT_DIR / "assets" / "cuttle.ico")
 
 # Binaries: vendor tools and native C++ binaries
