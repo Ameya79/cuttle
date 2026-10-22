@@ -60,6 +60,11 @@ def convert_docx_to_pdf_word(
         word = win32com.client.DispatchEx("Word.Application")
         word.Visible = False
         word.DisplayAlerts = WD_ALERTS_NONE
+        word.ScreenUpdating = False
+        with contextlib.suppress(Exception):
+            word.Options.Pagination = False
+            word.Options.CheckSpellingAsYouType = False
+            word.Options.CheckGrammarAsYouType = False
 
         # Open source document read-only and hidden
         doc = word.Documents.Open(

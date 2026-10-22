@@ -43,7 +43,7 @@ Name: "{autostartup}\{#MyAppName}"; Filename: "{app}\{#MyAppWorkerExe}"; Tasks: 
 
 [Run]
 ; 1. Register classic context menus
-Filename: "{app}\{#MyAppExeName}"; Parameters: "install-shell"; Flags: runhidden
+Filename: "{app}\cuttle.exe"; Parameters: "install-shell"; Flags: runhidden
 ; 2. On Windows 11 (build 22000+), register sparse MSIX package for top-level menu
 Filename: "powershell.exe"; Parameters: "-ExecutionPolicy Bypass -WindowStyle Hidden -File ""{app}\scripts\register_sparse_package.ps1"""; Flags: runhidden; MinVersion: 10.0.22000
 ; 3. Start the worker daemon in the background
@@ -53,7 +53,7 @@ Filename: "{app}\{#MyAppWorkerExe}"; Description: "Start Cuttle in the backgroun
 ; 1. Unregister Windows 11 sparse package
 Filename: "powershell.exe"; Parameters: "-ExecutionPolicy Bypass -WindowStyle Hidden -File ""{app}\scripts\unregister_sparse_package.ps1"""; Flags: runhidden; MinVersion: 10.0.22000
 ; 2. Cleanly unregister classic Explorer context menus
-Filename: "{app}\{#MyAppExeName}"; Parameters: "uninstall-shell"; Flags: runhidden
+Filename: "{app}\cuttle.exe"; Parameters: "uninstall-shell"; Flags: runhidden
 ; 3. Terminate running background worker process
 Filename: "taskkill.exe"; Parameters: "/F /IM cuttle-worker.exe"; Flags: runhidden
 

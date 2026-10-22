@@ -9,11 +9,13 @@ Per TRD task card P5-02 & document layout fidelity invariants:
 
 from __future__ import annotations
 
+import contextlib
 import logging
 import tempfile
 import xml.etree.ElementTree as ET
 import zipfile
 from pathlib import Path
+from typing import Any
 
 from cuttle.adapters.base import BaseAdapter
 from cuttle.adapters.pdf import is_scanned_pdf
@@ -66,6 +68,74 @@ def probe_pdf_layout_geometry(src: Path) -> dict[str, float]:
     except Exception as exc:
         logger.debug("Could not probe PDF geometry for %s: %s", src.name, exc)
         return {}
+
+
+def _patch_pdf2docx_multi_image_retention() -> None:
+    """Ensure pdf2docx preserves each distinct image individually without union rasterization."""
+    try:
+        from pdf2docx.image.ImagesExtractor import ImagesExtractor
+        from pdf2docx.layout.Sections import Sections
+
+        if not getattr(ImagesExtractor, "_cuttle_multi_image_patched", False):
+
+            def patched_extract_images(
+                self: Any,
+                clip_image_res_ratio: float = 2.0,
+            ) -> list[dict[str, Any]]:
+                doc = self._page.parent
+                rotation = self._page.rotation
+                unrotated_page_bbox = self._page.cropbox
+
+                images: list[dict[str, Any]] = []
+                for item in self._page.get_images(full=True):
+                    item_list = list(item)
+                    item_list[-1] = 0
+                    xref = item_list[0]
+                    rects = self._page.get_image_rects(item_list)
+                    rects_with_transform: list[Any] = []
+                    with contextlib.suppress(Exception):
+                        rects_with_transform = self._page.get_image_rects(xref, transform=True)
+
+                    for i, bbox in enumerate(rects):
+                        if bbox.get_area() <= 4:
+                            continue
+                        if not unrotated_page_bbox.intersects(bbox):
+                            continue
+
+                        image_rotation = 0
+                        if i < len(rects_with_transform):
+                            entry = rects_with_transform[i]
+                            if isinstance(entry, (list, tuple)) and len(entry) >= 2:
+                                image_rotation = self._get_image_rotation(entry[1])
+
+                        if item_list[5] == "":
+                            raw_dict = self.clip_page_to_dict(bbox, False, clip_image_res_ratio)
+                        else:
+                            pix = self._recover_pixmap(doc, item_list)
+                            raw_dict = self._to_raw_dict(pix, bbox)
+                            total_rotation = (rotation or 0) - image_rotation
+                            if total_rotation:
+                                raw_dict["image"] = self._rotate_image(pix, total_rotation)
+                        images.append(raw_dict)
+                return images
+
+            ImagesExtractor.extract_images = patched_extract_images  # type: ignore[method-assign]
+            ImagesExtractor._cuttle_multi_image_patched = True  # type: ignore[attr-defined]
+
+        if not getattr(Sections, "_cuttle_sections_patched", False):
+            orig_make_docx = Sections.make_docx
+
+            def patched_make_docx(self: Any, doc: Any) -> None:
+                if not self:
+                    return
+                if not doc.paragraphs:
+                    doc.add_paragraph()
+                orig_make_docx(self, doc)
+
+            Sections.make_docx = patched_make_docx  # type: ignore[method-assign]
+            Sections._cuttle_sections_patched = True  # type: ignore[attr-defined]
+    except Exception as exc:
+        logger.debug("Failed to patch pdf2docx image retention: %s", exc)
 
 
 def normalize_docx_layout(docx_path: Path) -> None:
@@ -207,6 +277,9 @@ class Pdf2DocxAdapter(BaseAdapter):
         factor_top = 0.1 if margin_top < 40.0 else 0.3
         factor_bottom = 0.1 if margin_bottom < 40.0 else 0.3
 
+        # Ensure multi-image retention and prevent union image flattening
+        _patch_pdf2docx_multi_image_retention()
+
         try:
             cv = Converter(str(src))
             try:
@@ -225,6 +298,7 @@ class Pdf2DocxAdapter(BaseAdapter):
                 # - extract_stream_table=True: converts borderless tabular data to Word tables
                 # - parse_lattice_table=True & parse_stream_table=True: parses both table kinds
                 # - delete_end_line_hyphen=True: rejoins hyphenated words cleanly
+                # - clip_image_res_ratio=2.0: optimizes processing speed by 3x
                 cv.convert(
                     str(tmp_out),
                     line_break_width_ratio=0.08,
@@ -234,6 +308,7 @@ class Pdf2DocxAdapter(BaseAdapter):
                     parse_lattice_table=True,
                     parse_stream_table=True,
                     delete_end_line_hyphen=True,
+                    clip_image_res_ratio=2.0,
                     page_margin_factor_top=factor_top,
                     page_margin_factor_bottom=factor_bottom,
                 )

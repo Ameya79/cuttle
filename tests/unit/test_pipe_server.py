@@ -153,3 +153,32 @@ def test_error_handling_malformed_and_unknown(
     resp3 = json.loads(call_pipe(server.pipe_name, req3).decode("utf-8"))
     assert resp3["status"] == "error"
     assert "requires 'src' and 'dst'" in resp3["message"]
+
+
+def test_concurrent_burst_pipe_requests(
+    pipe_fixture: tuple[PipeServer, JobQueue, JobDatabase],
+    fixtures_dir: Path,
+) -> None:
+    """8 concurrent clients hitting the pipe simultaneously must all succeed without drops."""
+    import concurrent.futures
+
+    server, _, _db = pipe_fixture
+    files = ["img.png", "img.jpg", "img.bmp", "img.webp"] * 2  # 8 files
+    results: list[dict[str, str]] = []
+
+    def _send(fname: str) -> dict[str, str]:
+        src = str(fixtures_dir / fname)
+        req = json.dumps({"op": "convert", "src": src, "dst": "png"}).encode("utf-8")
+        resp_raw = call_pipe(server.pipe_name, req, timeout_ms=5000)
+        res: dict[str, str] = json.loads(resp_raw.decode("utf-8"))
+        return res
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as ex:
+        futures = [ex.submit(_send, f) for f in files]
+        for fut in concurrent.futures.as_completed(futures):
+            results.append(fut.result())
+
+    assert len(results) == 8
+    for r in results:
+        assert r["status"] == "queued"
+        assert "batch_id" in r

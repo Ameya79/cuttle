@@ -46,17 +46,36 @@ class RegistryConfig:
 
 
 def get_default_cuttlectl_cmd() -> str:
-    """Resolve default command string to execute cuttlectl."""
+    """Resolve default command string to execute cuttlectl with zero console popups."""
+    # 1. PyInstaller frozen environment
     if getattr(sys, "frozen", False):
         exe_dir = Path(sys.executable).parent
         cuttlectl_exe = exe_dir / "cuttlectl.exe"
         if cuttlectl_exe.exists():
             return f'"{cuttlectl_exe}"'
 
+    # 2. Installed application directory in LocalAppData
+    local_app_dir = Path(os.environ.get("LOCALAPPDATA", "")) / "Programs" / "Cuttle"
+    if (local_app_dir / "cuttlectl.exe").is_file():
+        return f'"{local_app_dir / "cuttlectl.exe"}"'
+
+    # 3. Native C++ launcher in source tree
+    cxx_launcher = (
+        Path(__file__).resolve().parent.parent
+        / "platform"
+        / "windows"
+        / "launcher"
+        / "cuttlectl.exe"
+    )
+    if cxx_launcher.is_file():
+        return f'"{cxx_launcher}"'
+
+    # 4. PATH lookup
     cuttlectl_on_path = shutil.which("cuttlectl")
     if cuttlectl_on_path:
         return f'"{cuttlectl_on_path}"'
 
+    # 5. Windowless pythonw.exe fallback
     py_exec = sys.executable
     if sys.platform == "win32":
         candidate_pythonw = Path(sys.executable).with_name("pythonw.exe")

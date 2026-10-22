@@ -13,7 +13,7 @@
 
 namespace {
 
-constexpr DWORD PIPE_TIMEOUT_MS = 3000;
+constexpr DWORD PIPE_TIMEOUT_MS = 2000;
 constexpr DWORD BUF_SIZE = 4096;
 
 std::wstring get_safe_username() {
@@ -99,25 +99,48 @@ std::wstring get_module_dir() {
     return std::wstring(buf);
 }
 
-bool try_call_pipe(const std::wstring& pipe_name, const std::string& payload, std::string* out_resp = nullptr) {
+bool try_call_pipe(const std::wstring& pipe_name, const std::string& payload, std::string* out_resp = nullptr, DWORD timeout_ms = 5000) {
     char resp_buf[BUF_SIZE] = {0};
     DWORD bytes_read = 0;
+    auto start = std::chrono::steady_clock::now();
+    DWORD sleep_ms = 10;
 
-    BOOL ok = CallNamedPipeW(
-        pipe_name.c_str(),
-        (LPVOID)payload.data(),
-        (DWORD)payload.size(),
-        resp_buf,
-        sizeof(resp_buf) - 1,
-        &bytes_read,
-        500
-    );
+    while (true) {
+        BOOL ok = CallNamedPipeW(
+            pipe_name.c_str(),
+            (LPVOID)payload.data(),
+            (DWORD)payload.size(),
+            resp_buf,
+            sizeof(resp_buf) - 1,
+            &bytes_read,
+            1000
+        );
 
-    if (ok) {
-        if (out_resp) {
-            *out_resp = std::string(resp_buf, bytes_read);
+        if (ok) {
+            if (out_resp) {
+                *out_resp = std::string(resp_buf, bytes_read);
+            }
+            return true;
         }
-        return true;
+
+        DWORD err = GetLastError();
+        // Handle burst contention (231 = ERROR_PIPE_BUSY, 2 = ERROR_FILE_NOT_FOUND)
+        if (err == ERROR_PIPE_BUSY || err == ERROR_FILE_NOT_FOUND) {
+            auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
+                std::chrono::steady_clock::now() - start
+            ).count();
+            if (elapsed >= (long long)timeout_ms) {
+                break;
+            }
+            if (err == ERROR_PIPE_BUSY) {
+                WaitNamedPipeW(pipe_name.c_str(), 500);
+            } else {
+                Sleep(sleep_ms);
+                if (sleep_ms < 100) sleep_ms *= 2;
+            }
+            continue;
+        }
+        break;
     }
     return false;
 }
@@ -177,7 +200,7 @@ bool start_worker_daemon() {
 }
 
 bool ensure_pipe_ready(const std::wstring& pipe_name, DWORD timeout_ms = PIPE_TIMEOUT_MS) {
-    if (try_call_pipe(pipe_name, "{\"op\":\"ping\"}")) {
+    if (try_call_pipe(pipe_name, "{\"op\":\"ping\"}", nullptr, 150)) {
         return true;
     }
 
@@ -185,13 +208,13 @@ bool ensure_pipe_ready(const std::wstring& pipe_name, DWORD timeout_ms = PIPE_TI
 
     auto start = std::chrono::steady_clock::now();
     while (true) {
-        if (try_call_pipe(pipe_name, "{\"op\":\"ping\"}")) {
+        if (try_call_pipe(pipe_name, "{\"op\":\"ping\"}", nullptr, 150)) {
             return true;
         }
         auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::steady_clock::now() - start
         ).count();
-        if (elapsed > timeout_ms) {
+        if (elapsed > (long long)timeout_ms) {
             break;
         }
         Sleep(25);
@@ -237,14 +260,57 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int) {
         }
         if (file_exists(py)) {
             STARTUPINFOW si = {sizeof(si)};
+            si.dwFlags = STARTF_USESHOWWINDOW;
+            si.wShowWindow = SW_HIDE;
             PROCESS_INFORMATION pi = {0};
             std::wstring cmd = L"\"" + py + L"\" -m cuttle.worker.cuttlectl missing-tool " + tool;
-            CreateProcessW(NULL, &cmd[0], NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi);
+            CreateProcessW(NULL, &cmd[0], NULL, NULL, FALSE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi);
             CloseHandle(pi.hProcess);
             CloseHandle(pi.hThread);
         }
         LocalFree(argv);
         return 0;
+    }
+
+    if (subcmd == L"install-shell" || subcmd == L"uninstall-shell") {
+        std::wstring mod_dir = get_module_dir();
+        std::wstring cuttle_exe = mod_dir + L"\\cuttle.exe";
+        STARTUPINFOW si = {sizeof(si)};
+        si.dwFlags = STARTF_USESHOWWINDOW;
+        si.wShowWindow = SW_HIDE;
+        PROCESS_INFORMATION pi = {0};
+
+        std::wstring cmd;
+        if (file_exists(cuttle_exe)) {
+            cmd = L"\"" + cuttle_exe + L"\" " + subcmd;
+        } else {
+            std::vector<std::wstring> py_candidates = {
+                mod_dir + L"\\pythonw.exe",
+                mod_dir + L"\\.venv\\Scripts\\pythonw.exe",
+                mod_dir + L"\\..\\.venv\\Scripts\\pythonw.exe",
+                mod_dir + L"\\..\\..\\.venv\\Scripts\\pythonw.exe"
+            };
+            for (const auto& py : py_candidates) {
+                if (file_exists(py)) {
+                    cmd = L"\"" + py + L"\" -m cuttle.worker.cuttlectl " + subcmd;
+                    break;
+                }
+            }
+        }
+
+        if (!cmd.empty()) {
+            if (CreateProcessW(NULL, &cmd[0], NULL, NULL, FALSE, CREATE_NO_WINDOW, NULL, mod_dir.c_str(), &si, &pi)) {
+                WaitForSingleObject(pi.hProcess, 15000);
+                DWORD exit_code = 0;
+                GetExitCodeProcess(pi.hProcess, &exit_code);
+                CloseHandle(pi.hProcess);
+                CloseHandle(pi.hThread);
+                LocalFree(argv);
+                return (int)exit_code;
+            }
+        }
+        LocalFree(argv);
+        return 1;
     }
 
     std::wstring target_fmt;

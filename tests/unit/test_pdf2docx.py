@@ -121,3 +121,37 @@ def test_cancellation_honored(tmp_path: Path) -> None:
         adapter.run(plan, on_progress=lambda p, m: None, cancel=cancel)
     assert exc_info.value.code == "E_CANCELLED"
     assert not tmp_out.exists()
+
+
+def test_multi_image_retention_preserves_individual_images(tmp_path: Path) -> None:
+    """Multiple images on a single page must remain separate images without union flattening."""
+    import zipfile
+
+    import fitz
+
+    # Create PDF with 2 distinct images and text
+    pdf_path = tmp_path / "multi_img.pdf"
+    doc = fitz.open()
+    page = doc.new_page(width=600, height=800)
+
+    img1_path = tmp_path / "img1.png"
+    img2_path = tmp_path / "img2.png"
+    Image.new("RGB", (80, 80), color="red").save(img1_path)
+    Image.new("RGB", (80, 80), color="blue").save(img2_path)
+
+    page.insert_image(fitz.Rect(50, 50, 130, 130), filename=str(img1_path))
+    page.insert_image(fitz.Rect(90, 90, 170, 170), filename=str(img2_path))
+    page.insert_text(fitz.Point(50, 300), "Multi-image retention verification test.")
+    doc.save(pdf_path)
+    doc.close()
+
+    tmp_out = tmp_path / "multi_img_out.docx"
+    adapter = Pdf2DocxAdapter()
+    plan = adapter.plan(pdf_path, "docx", tmp_out, {})
+    adapter.run(plan, on_progress=lambda p, m: None, cancel=CancelToken())
+
+    assert tmp_out.is_file()
+    with zipfile.ZipFile(tmp_out) as zf:
+        media_files = [f for f in zf.namelist() if f.startswith("word/media/")]
+        # Assert at least 2 distinct media files are retained
+        assert len(media_files) >= 2, f"Expected distinct media files, found {media_files}"

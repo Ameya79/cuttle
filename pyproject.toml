@@ -35,6 +35,8 @@ dependencies = [
 
 [project.scripts]
 cuttle = "cuttle.cli:app"
+
+[project.gui-scripts]
 cuttlectl = "cuttle.worker.cuttlectl:main"
 cuttle-worker = "cuttle.worker.main:main"
 
