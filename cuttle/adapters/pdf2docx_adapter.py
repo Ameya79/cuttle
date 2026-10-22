@@ -52,10 +52,19 @@ def probe_pdf_layout_geometry(src: Path) -> dict[str, float]:
             if not blocks:
                 return {"width": float(rect.width), "height": float(rect.height)}
 
-            min_y0 = min(b[1] for b in blocks)
-            max_y1 = max(b[3] for b in blocks)
-            margin_top = max(0.0, float(min_y0))
-            margin_bottom = max(0.0, float(rect.height - max_y1))
+            # Filter for blocks that contain non-whitespace text or images
+            content_blocks = [
+                b
+                for b in blocks
+                if len(b) >= 4
+                and (len(b) < 5 or (isinstance(b[4], str) and b[4].strip()) or b[-1] == 1)
+            ]
+            eval_blocks = content_blocks if content_blocks else blocks
+
+            min_y0 = min(b[1] for b in eval_blocks)
+            max_y1 = max(b[3] for b in eval_blocks)
+            margin_top = max(0.0, float(min_y0 - rect.y0))
+            margin_bottom = max(0.0, float(rect.y1 - max_y1))
 
             return {
                 "width": float(rect.width),
@@ -119,8 +128,8 @@ def _patch_pdf2docx_multi_image_retention() -> None:
                         images.append(raw_dict)
                 return images
 
-            ImagesExtractor.extract_images = patched_extract_images  # type: ignore[method-assign]
-            ImagesExtractor._cuttle_multi_image_patched = True  # type: ignore[attr-defined]
+            ImagesExtractor.extract_images = patched_extract_images
+            ImagesExtractor._cuttle_multi_image_patched = True
 
         if not getattr(Sections, "_cuttle_sections_patched", False):
             orig_make_docx = Sections.make_docx
@@ -132,8 +141,8 @@ def _patch_pdf2docx_multi_image_retention() -> None:
                     doc.add_paragraph()
                 orig_make_docx(self, doc)
 
-            Sections.make_docx = patched_make_docx  # type: ignore[method-assign]
-            Sections._cuttle_sections_patched = True  # type: ignore[attr-defined]
+            Sections.make_docx = patched_make_docx
+            Sections._cuttle_sections_patched = True
     except Exception as exc:
         logger.debug("Failed to patch pdf2docx image retention: %s", exc)
 

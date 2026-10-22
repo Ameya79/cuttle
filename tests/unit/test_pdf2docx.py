@@ -155,3 +155,26 @@ def test_multi_image_retention_preserves_individual_images(tmp_path: Path) -> No
         media_files = [f for f in zf.namelist() if f.startswith("word/media/")]
         # Assert at least 2 distinct media files are retained
         assert len(media_files) >= 2, f"Expected distinct media files, found {media_files}"
+
+
+def test_probe_pdf_layout_geometry(tmp_path: Path) -> None:
+    """Probe geometry accurately computes margins against page bounding box."""
+    import fitz
+
+    from cuttle.adapters.pdf2docx_adapter import probe_pdf_layout_geometry
+
+    pdf_path = tmp_path / "probe_test.pdf"
+    doc = fitz.open()
+    page = doc.new_page(width=600, height=800)
+    page.insert_text(fitz.Point(100, 120), "Top content line")
+    page.insert_text(fitz.Point(100, 720), "Bottom content line")
+    doc.save(pdf_path)
+    doc.close()
+
+    geom = probe_pdf_layout_geometry(pdf_path)
+    assert geom["width"] == 600.0
+    assert geom["height"] == 800.0
+    assert geom["margin_top"] > 0.0
+    assert geom["margin_bottom"] > 0.0
+    # Page height is 800, bottom text at ~720, so margin_bottom should be ~70-80
+    assert 50.0 < geom["margin_bottom"] < 100.0
