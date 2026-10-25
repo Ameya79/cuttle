@@ -16,6 +16,7 @@
   <img src="https://img.shields.io/badge/tests-393%20passing-success.svg" alt="Tests: 393 passing">
   <img src="https://img.shields.io/badge/offline--first-guaranteed-green.svg" alt="Offline Guaranteed">
   <a href="docs/BENCHMARKS.md"><img src="https://img.shields.io/badge/benchmarks-verified-purple.svg" alt="Benchmarks Verified"></a>
+  <a href="https://benchtoplabs.vercel.app/p/cuttle"><img src="https://benchtoplabs.vercel.app/api/badge/cuttle" alt="Benchtop Labs: 6/6 Passed"></a>
 </p>
 
 ---
@@ -30,7 +31,7 @@
 - 🔔 **Interactive Windows Notifications**: One-click **[Open File]** and **[Show in Folder]** action buttons right from the Windows toast banner.
 - 🏷️ **Honest Quality Transparency**: Every conversion clearly indicates whether it is **Lossless**, **Lossy**, or **Best Effort** (see [`docs/quality.md`](docs/quality.md)).
 - 🚀 **Empirical Benchmarks**: Measured conversion speeds and mathematical fidelity in [`docs/BENCHMARKS.md`](docs/BENCHMARKS.md).
-- 💬 **Plain-English Feedback**: Never decipher cryptic error codes—get clear messages like *"The file is password-protected"* or *"Disk full"*.
+- 💬 **Plain-English Feedback**: Never decipher cryptic error codes: get clear messages like *"The file is password-protected"* or *"Disk full"*.
 
 ---
 
