@@ -1,0 +1,7 @@
+services:
+  cuttle:
+    build: .
+    container_name: cuttle
+    volumes:
+      - .:/data
+    command: ["formats"]

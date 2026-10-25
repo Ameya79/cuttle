@@ -16,7 +16,13 @@
   <img src="https://img.shields.io/badge/tests-393%20passing-success.svg" alt="Tests: 393 passing">
   <img src="https://img.shields.io/badge/offline--first-guaranteed-green.svg" alt="Offline Guaranteed">
   <a href="docs/BENCHMARKS.md"><img src="https://img.shields.io/badge/benchmarks-verified-purple.svg" alt="Benchmarks Verified"></a>
-  <a href="https://benchtoplabs.vercel.app/p/cuttle"><img src="https://benchtoplabs.vercel.app/api/badge/cuttle" alt="Benchtop Labs: 6/6 Passed"></a>
+  <a href="https://benchtoplabs.vercel.app/p/cuttle"><img src="https://benchtoplabs.vercel.app/api/badge/cuttle?style=featured" alt="Featured on Benchtop Labs"></a>
+</p>
+
+<p align="center">
+  <a href="https://benchtoplabs.vercel.app/p/cuttle">
+    <img src="https://benchtoplabs.vercel.app/api/badge/cuttle?style=card" alt="Benchtop Labs Verified Spec" />
+  </a>
 </p>
 
 ---
@@ -107,6 +113,21 @@ uv run cuttle formats
 
 # Verify external tool health and system compatibility
 uv run cuttle doctor
+```
+
+### Option C: 🐳 Headless Linux Engine (Docker)
+
+Anyone can run Cuttle's conversion engine on any platform (Linux, macOS, Windows) without desktop GUI or Windows Explorer dependencies:
+
+```bash
+# List all registered format matrix converters
+docker compose run --rm cuttle formats
+
+# Convert any media file using mounted folder
+docker compose run --rm cuttle convert /data/video.mp4 --to mp3
+
+# Check engine health and installed tool binaries
+docker compose run --rm cuttle doctor
 ```
 
 ---
